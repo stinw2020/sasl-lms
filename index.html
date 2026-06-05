@@ -211,6 +211,33 @@
           padding-bottom: 100px !important; /* Niche thodi extra jagah taaki kuch na chhupe */
         }
       }
+      /* ======================================================= */
+      /* 🖨️ 100% PERFECT PRINT FIX (ID CARD & RECEIPT)          */
+      /* ======================================================= */
+      @media print {
+        /* 1. Website ka baaki sab kuch chhupa do */
+        body * { visibility: hidden !important; }
+        html, body { overflow: visible !important; height: auto !important; background: white !important; }
+
+        /* 2. Modal ke kaale background ko hatao */
+        .modal-overlay { background: transparent !important; position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important; width: 100%; height: auto; }
+
+        /* 3. Sirf ID Card ko dikhao aur page ke top par set karo */
+        #idCardContent, #idCardContent * { visibility: visible !important; }
+        #idCardContent { position: absolute; left: 0; top: 0; margin: 0 !important; box-shadow: none !important; border: 2px solid #000 !important; width: 320px !important; padding: 15px !important; page-break-inside: avoid; }
+
+        /* 4. Sirf Receipt ko dikhao aur page ke top par set karo */
+        #receiptContent, #receiptContent * { visibility: visible !important; }
+        #receiptContent { position: absolute; left: 0; top: 0; margin: 0 !important; box-shadow: none !important; border: 1px dashed #000 !important; width: 380px !important; padding: 15px !important; page-break-inside: avoid; }
+
+        /* 5. SABSE ZAROORI: Saare Buttons ko Print se HATA do */
+        .print-btn, 
+        #idCardContent button, 
+        #receiptContent button { 
+            display: none !important; 
+            visibility: hidden !important; 
+        }
+      }
     </style>
   </head>
   <body>
