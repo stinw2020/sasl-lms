@@ -154,7 +154,10 @@
       /* --- MOBILE APP UI ADJUSTMENTS --- */
       .mobile-header, .menu-overlay { display: none; }
       @media screen and (max-width: 768px) {
-        #dashboardDiv { display: block !important; }
+        /* Yahan Scroll lock hataya gaya hai 👇 */
+        body { overflow-y: auto !important; height: auto !important; overflow-x: hidden !important; }
+        #dashboardDiv { display: block !important; height: auto !important; overflow: visible !important; }
+        
         .mobile-header { display: flex !important; align-items: center; background-color: #0f131c; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 1000; }
         .hamburger { display: flex; flex-direction: column; gap: 5px; cursor: pointer; margin-right: 15px; }
         .hamburger span { width: 24px; height: 3px; background-color: white; border-radius: 2px; }
@@ -167,7 +170,7 @@
         .nav-menu li { padding: 15px 25px !important; font-size: 15px !important; }
         .menu-overlay.active { display: block !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 10000; }
         
-        .main-content { padding: 15px !important; height: auto !important; overflow-y: visible !important; }
+        .main-content { padding: 15px !important; height: auto !important; overflow: visible !important; }
         .header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; margin-bottom: 15px !important; }
         .header button { width: 100% !important; }
         .widgets-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
