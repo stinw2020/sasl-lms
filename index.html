@@ -11,25 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="SASL LMS">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/Jhb1ch14/sasl-logo.jpg">
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        const manifest = {
-          "name": "SASL Library Management System",
-          "short_name": "SASL LMS",
-          "display": "standalone",
-          "background_color": "#f4f7fc",
-          "theme_color": "#0f131c",
-          "icons": [{"src": "https://i.postimg.cc/Jhb1ch14/sasl-logo.jpg", "sizes": "512x512", "type": "image/png"}]
-        };
-        const stringManifest = JSON.stringify(manifest);
-        const blob = new Blob([stringManifest], {type: 'application/json'});
-        const manifestURL = URL.createObjectURL(blob);
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = manifestURL;
-        document.head.appendChild(link);
-      });
-    </script>
+    <link rel="manifest" href="manifest.json">
 
     <style>
       /* =========================================
