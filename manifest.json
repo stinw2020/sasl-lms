@@ -1,0 +1,16 @@
+{
+  "name": "SASL Library Management System",
+  "short_name": "SASL LMS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fc",
+  "theme_color": "#0f131c",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
