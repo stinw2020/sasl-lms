@@ -415,11 +415,6 @@
 
       // --- SECURITY & PIN LOCK ---
       window.onload = function() {
-        // 🚀 SABSE PEHLE NET CHECK KARO
-        if (!navigator.onLine) {
-            document.getElementById('offlineScreen').style.display = 'flex';
-            return; // Aage ka koi dashboard load mat karo!
-        }
          let events = ['mousemove','keypress','touchstart','click','scroll'];
          events.forEach(e => document.addEventListener(e, () => { lastActivityTime = Date.now(); }, true));
          setInterval(checkInactivity, 10000); 
