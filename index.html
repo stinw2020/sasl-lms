@@ -415,6 +415,13 @@
 
       // --- SECURITY & PIN LOCK ---
       window.onload = function() {
+         // 🚀 1. SABSE PEHLE NET CHECK KARO
+         if (!navigator.onLine) {
+             document.getElementById('offlineScreen').style.display = 'flex';
+             return; // Net nahi hai toh aage ka koi code mat chalao!
+         }
+
+         // 🚀 2. BAAKI KA PURANA SECURITY CODE
          let events = ['mousemove','keypress','touchstart','click','scroll'];
          events.forEach(e => document.addEventListener(e, () => { lastActivityTime = Date.now(); }, true));
          setInterval(checkInactivity, 10000); 
@@ -424,9 +431,19 @@
              if(savedPin) showPinScreen(); else executeSystemLogout();
          } else showLoginScreen();
       };
+
+      // --- APP MINIMIZE SENSOR ---
       document.addEventListener("visibilitychange", () => {
-         if(document.visibilityState === "visible" && localStorage.getItem("isLoggedIn") === "true") showPinScreen();
-         else lastActivityTime = Date.now();
+         if(document.visibilityState === "visible" && localStorage.getItem("isLoggedIn") === "true") {
+             // App background se wapas aayi hai, net check karlo ek baar
+             if (!navigator.onLine) {
+                 document.getElementById('offlineScreen').style.display = 'flex';
+             } else {
+                 showPinScreen();
+             }
+         } else {
+             lastActivityTime = Date.now();
+         }
       });
       function checkInactivity() { if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= TIMEOUT_MS) executeSystemLogout(); }
 
