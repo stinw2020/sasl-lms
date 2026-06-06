@@ -22,7 +22,13 @@
       * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
       body { background-color: #f4f7fc; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
       
-      #pinScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f131c; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; padding: 20px; }
+#pinScreen { 
+    display: none !important; /* Force hidden */
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100%; 
+    background: #0f131c; 
+    z-index: 999999 !important; /* Sabse upar */
+}
       .pin-header h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; letter-spacing: 0.5px; }
       .pin-header p { margin: 0 0 30px 0; color: #7f8c8d; font-size: 14px; }
       .pin-container { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
@@ -579,17 +585,49 @@
 
       function showPinScreen() { document.getElementById("loginWrapper").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("pinScreen").style.display = "flex"; clearPinInputs(); document.getElementById("pin1").focus(); }
       function showLoginScreen() { document.getElementById("pinScreen").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("loginWrapper").style.display = "flex"; showLoginPanel(); }
-      function movePinFocus(curr, nextID) { if(curr.value.length===1) { if(nextID==='verify') processPinVerification(); else document.getElementById(nextID).focus(); } }
+function movePinFocus(curr, nextID) {
+    // Agar user ne number type kiya aur next box hai
+    if (curr.value.length === 1 && nextID !== 'verify') {
+        document.getElementById(nextID).focus();
+    }
+    // Agar user ne backspace dabaya (ya value delete ki)
+    if (curr.value.length === 0 && curr.id !== 'pin1') {
+        let prev = parseInt(curr.id.replace('pin', '')) - 1;
+        document.getElementById('pin' + prev).focus();
+    }
+    // Agar 4 digit bhar gaye, toh auto-verify karein
+    if (document.getElementById('pin4').value.length === 1 && curr.id === 'pin4') {
+        processPinVerification();
+    }
+}
       function clearPinInputs() { ["pin1","pin2","pin3","pin4"].forEach(id=>document.getElementById(id).value=""); document.getElementById("pinErrMsg").innerText = ""; }
       function processPinVerification() {
-         let ent = document.getElementById("pin1").value+document.getElementById("pin2").value+document.getElementById("pin3").value+document.getElementById("pin4").value;
-         document.getElementById("pinActionBtn").innerText = "Verifying...";
-         setTimeout(() => {
-             document.getElementById("pinActionBtn").innerText = "Unlock Portal";
-             if(ent === localStorage.getItem("appPin")) { document.getElementById("pinScreen").style.display = "none"; loadWorkspace(); } 
-             else { document.getElementById("pinErrMsg").innerText = "Incorrect PIN!"; clearPinInputs(); document.getElementById("pin1").focus(); }
-         }, 400);
-      }
+    let pin1 = document.getElementById("pin1").value;
+    let pin2 = document.getElementById("pin2").value;
+    let pin3 = document.getElementById("pin3").value;
+    let pin4 = document.getElementById("pin4").value;
+    let ent = pin1 + pin2 + pin3 + pin4;
+
+    if (ent.length < 4) {
+        document.getElementById("pinErrMsg").innerText = "Please enter 4 digits!";
+        return;
+    }
+
+    document.getElementById("pinActionBtn").innerText = "Verifying...";
+
+    setTimeout(() => {
+        if (ent === localStorage.getItem("appPin")) {
+            document.getElementById("pinScreen").style.display = "none";
+            document.getElementById("pinScreen").style.zIndex = "-1"; // Extra security
+            loadWorkspace(); 
+        } else {
+            document.getElementById("pinErrMsg").innerText = "Incorrect PIN!";
+            clearPinInputs();
+            document.getElementById("pin1").focus();
+            document.getElementById("pinActionBtn").innerText = "Unlock Portal";
+        }
+    }, 500);
+}
       function executeSystemLogout() { localStorage.removeItem("isLoggedIn"); currentUserRole = "User"; currentUserId = ""; showLoginScreen(); }
 
       function showLoginPanel() { document.getElementById("forgotBox").style.display="none"; document.getElementById("loginBox").style.display="block"; }
