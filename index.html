@@ -788,74 +788,36 @@
       function toggleStatus(row, nStatus) { callBackend("toggleStudentStatus", {rowIndex:row, status:nStatus}, r=>{loadStudentDetails(); loadDashboardData();}); }
       function deleteStudentBtn(row, id) { if(confirm("Delete "+id+"?")) callBackend("deleteStudent", {rowIndex:row, id:id}, r=>{loadStudentDetails(); loadDashboardData();}); }
 
-function openUpdateModal(rIdx) { 
-          showSection('sec-update-student', 'nav-studentList'); // Pehle page kholo
-          let st = globalStudents.find(s => s.rowIndex == rIdx); 
-          if(!st) return; 
-          // Phir data dalo
-          ["id","name","fname","aadhaar","join","due","mobile","altMobile","address","course","seat","shift","feePlan","discount","base"].forEach(k => {
-              let el = document.getElementById("upd_"+k);
-              if(el) el.value = st[k=="join"?"joinDate":k=="due"?"dueDate":k=="base"?"baseFee":k] || "";
-          }); 
-          document.getElementById("upd_rowIndex").value = st.rowIndex; 
-      }      function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
-function saveStudentUpdate() { 
-          let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
-          if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
-          document.getElementById("updSaveBtn").innerHTML="Saving..."; 
-          callBackend("updateStudentData", d, r=>{
-              document.getElementById("updSaveBtn").innerHTML="Save Updates"; 
-              showSection('sec-studentList', 'nav-studentList'); 
-              let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              
-              // FIX: Yahan poora data paas kiya gaya hai
-              showIdCard(
-                  document.getElementById("upd_id").value, 
-                  { studentName: document.getElementById("upd_name").value, fatherName: document.getElementById("upd_fname").value, mobile: d.mobile, joinDate: document.getElementById("upd_join").value }, 
-                  currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, 
-                  st?st.photo:"", 
-                  "Update"
-              ); 
-              loadStudentDetails();
-          }); 
-      }
-      function openRejoinModal(rIdx) { 
-          showSection('sec-rejoin-student', 'nav-studentList'); 
-          let st=globalStudents.find(s=>s.rowIndex==rIdx); 
-          if(!st) return; 
-          // Yahan 'fname' add kiya gaya hai
-          ["id","name","fname","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k=> {
-              let el = document.getElementById("rej_"+k);
-              if(el) el.value = st[k] || "";
-          }); 
-          document.getElementById("rej_rowIndex").value=st.rowIndex; 
-          document.getElementById("rej_due").value=new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; 
-          document.getElementById("rej_seat").value=""; 
-          calculateRejFee(); 
-      }
-      function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
-function saveRejoinStudent() { 
-          let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); 
-          let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; 
-          if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
-          document.getElementById("rejSaveBtn").innerHTML="Saving..."; 
-          callBackend("rejoinStudent", d, r=>{
-              document.getElementById("rejSaveBtn").innerHTML="Rejoin"; 
-              showSection('sec-studentList', 'nav-studentList'); 
-              let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              
-              // FIX: Yahan poora data paas kiya gaya hai
-              showIdCard(
-                  document.getElementById("rej_id").value, 
-                  { studentName: document.getElementById("rej_name").value, fatherName: document.getElementById("rej_fname").value, mobile: d.mobile, joinDate: fDate }, 
-                  currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, 
-                  st?st.photo:"", 
-                  "Rejoin"
-              ); 
-              loadStudentDetails(); 
-              loadDashboardData();
-          }); 
-      }
+// Update Save ke liye
+function saveStudentUpdate() {
+    let id = document.getElementById("upd_id").value;
+    let sObj = {
+        studentName: document.getElementById("upd_name").value,
+        fatherName: document.getElementById("upd_fname").value,
+        mobile: document.getElementById("upd_mobile").value,
+        joinDate: document.getElementById("upd_join").value
+    };
+    
+    // Backend call ke baad showIdCard call karein
+    callBackend("updateStudentData", {...}, r => {
+        showIdCard(id, sObj, currentConfig, "", "Update");
+    });
+}
+
+// Rejoin Save ke liye
+function saveRejoinStudent() {
+    let id = document.getElementById("rej_id").value;
+    let sObj = {
+        studentName: document.getElementById("rej_name").value,
+        fatherName: document.getElementById("rej_fname").value, // Guardian name add kiya
+        mobile: document.getElementById("rej_mobile").value,
+        joinDate: document.getElementById("rej_due").value
+    };
+    
+    callBackend("rejoinStudent", {...}, r => {
+        showIdCard(id, sObj, currentConfig, "", "Rejoin");
+    });
+}
       function searchStudent() { let q=document.getElementById("searchQuery").value.trim(); if(!q) return; document.getElementById("searchBtn").innerHTML="Searching..."; document.getElementById("f_submitDate").value=new Date().toISOString().split('T')[0]; callBackend("searchStudentForFee", {query:q}, res=>{document.getElementById("searchBtn").innerHTML="Search"; if(res.success){document.getElementById("feeFormBlock").style.display="block"; document.getElementById("f_stdId").value=res.id; document.getElementById("f_stdName").value=res.name; document.getElementById("f_dueDate").value=res.dueDate; document.getElementById("f_shift").value=res.shift; document.getElementById("f_feePlan").value=res.feePlan; currentFeeMobile=res.mobile||""; document.getElementById("f_regFee").value="0"; updateCollectFeePlan(); document.getElementById("f_baseFee").value=res.baseFee; calcTotalFee();} else {document.getElementById("feeFormBlock").style.display="none"; document.getElementById("searchMessage").innerHTML=`<span class='error'>${res.message}</span>`;}}); }
       function updateCollectFeePlan() { let r=getShiftRates(document.getElementById("f_shift").value), pl=document.getElementById("f_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; document.getElementById("f_baseFee").value=b; let mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], dStr=document.getElementById("f_dueDate").value; if(dStr){let pts=dStr.split("/"); if(pts.length===3){let d=new Date(pts[2],pts[1]-1,pts[0]), sM=mn[d.getMonth()], yr=d.getFullYear(); if(pl==="Monthly") document.getElementById("f_month").value=sM+" "+yr; else if(pl==="Quarterly"){let d2=new Date(d);d2.setMonth(d2.getMonth()+2);document.getElementById("f_month").value=sM+" - "+mn[d2.getMonth()]+" "+yr;} else if(pl==="Half Yearly"){let d3=new Date(d);d3.setMonth(d3.getMonth()+5);document.getElementById("f_month").value=sM+" - "+mn[d3.getMonth()]+" "+yr;} else if(pl==="Yearly") document.getElementById("f_month").value=sM+" "+yr+" - "+sM+" "+(yr+1); else if(pl==="Demo") document.getElementById("f_month").value="Demo Period";}} calcTotalFee(); }
       function calcTotalFee() { document.getElementById("f_totalPaid").value = Math.max(0, (parseInt(document.getElementById("f_baseFee").value)||0)+(parseInt(document.getElementById("f_regFee").value)||0)-(parseInt(document.getElementById("f_discount").value)||0)); }
@@ -893,12 +855,48 @@ function saveRejoinStudent() {
 
       let currentIdCardAction = "Add";
       
-      function showIdCard(id, data, libData, pData, actionType) { 
-          currentIdCardAction = actionType || "Add"; 
-          document.getElementById("idc_libName").innerText = libData.name || "LIBRARY"; 
-          document.getElementById("idc_libAddress").innerText = libData.address || "Address"; 
-          document.getElementById("idc_libContact").innerText = "Ph: " + (libData.mobile || "") + " | " + (libData.email || ""); 
-          
+      function showIdCard(id, studentObj, libData, photo, actionType) {
+    currentIdCardAction = actionType;
+    // Modal dikhayein
+    document.getElementById("idCardModal").style.display = "block";
+    
+    // UI elements update karein
+    document.getElementById("idc_name").innerText = studentObj.studentName;
+    document.getElementById("idc_id").innerText = id;
+    document.getElementById("idc_fname").innerText = studentObj.fatherName;
+    document.getElementById("idc_mobile").innerText = studentObj.mobile;
+    document.getElementById("idc_join").innerText = studentObj.joinDate;
+    document.getElementById("idc_libName").innerText = libData.name;
+    
+    // Photo set karein
+    let imgEl = document.getElementById("idc_photo");
+    imgEl.src = photo || 'placeholder.png';
+}
+
+    // Canvas par draw karke image banao
+    let container = document.createElement("div");
+    container.innerHTML = idCardHTML;
+    document.body.appendChild(container);
+
+    html2canvas(document.getElementById("finalIdCard")).then(canvas => {
+        let img = document.createElement("img");
+        img.src = canvas.toDataURL("image/jpeg");
+        img.style.width = "90%";
+        img.style.margin = "20px auto";
+        img.style.display = "block";
+        
+        let modal = document.getElementById("idCardModal");
+        modal.style.display = "flex";
+        // Modal ke content ko image se replace karo
+        document.getElementById("idCardContent").innerHTML = `
+            <h3>Long press image to Save</h3>
+            ${img.outerHTML}
+            <button class="btn-green" onclick="sendWhatsappWelcome()">WhatsApp</button>
+            <button class="btn-red" onclick="this.closest('.modal-overlay').style.display='none';">Close</button>
+        `;
+        document.body.removeChild(container);
+    });
+}
           // --- FIX: ID CARD PHOTO ---
           let photoEl = document.getElementById("idc_photo");
           if (pData && pData.startsWith("data:image")) {
@@ -917,20 +915,21 @@ function saveRejoinStudent() {
           document.getElementById("idCardModal").style.display = "flex"; 
       }
       
-      function sendWhatsappWelcome() { 
-          let n=document.getElementById("idc_name").innerText, i=document.getElementById("idc_id").innerText, m=document.getElementById("idc_mobile").innerText, l=document.getElementById("idc_libName").innerText; 
-          if(m && m.length===10) m="91"+m; 
-          let msg=""; 
-          
-          if(currentIdCardAction==="Update") {
-              msg=`*${l}*\n\nDear ${n},\nYour detail is successfully updated. Your ID is *${i}*.\n\nThank you!`; 
-          } else if(currentIdCardAction==="Rejoin") {
-              msg=`*${l}*\n\nDear ${n},\nYour rejoin is successful. Your ID is *${i}*.\n\nThank you!`; 
-          } else {
-              msg=`*${l}*\n\nDear ${n},\nYour registration is successful. Your ID is *${i}*.\n\nThank you!`; 
-          }
-          window.open("https://wa.me/"+m+"?text="+encodeURIComponent(msg), "_blank"); 
-      }
+      function sendWhatsappWelcome() {
+    let n = document.getElementById("idc_name").innerText;
+    let i = document.getElementById("idc_id").innerText;
+    let m = document.getElementById("idc_mobile").innerText;
+    let l = document.getElementById("idc_libName").innerText;
+    
+    let msg = "";
+    if(currentIdCardAction === "Update") {
+        msg = `*${l}*\n\nDear ${n},\nYour detail is successfully updated.\nID: *${i}*\nMobile: ${m}\n\nThank you!`;
+    } else if(currentIdCardAction === "Rejoin") {
+        msg = `*${l}*\n\nDear ${n},\nYour rejoin is successful.\nID: *${i}*\nMobile: ${m}\n\nThank you!`;
+    }
+    
+    window.open(`https://wa.me/91${m}?text=${encodeURIComponent(msg)}`, "_blank");
+}
       
       function sendWhatsappReceipt() { 
           let mob=document.getElementById("r_mobile").value; 
