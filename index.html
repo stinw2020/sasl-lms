@@ -391,14 +391,35 @@
       let currentUserRole = "User", currentUserId = "", currentUserName = "System"; 
       let currentConfig = null, currentFeeMobile = "", globalStudents = [], globalAllFees = [], globalQrUrl = ""; 
 
-      function callBackend(action, data, onSuccess, onFailure) {
-        fetch(API_URL, { redirect: "follow", method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: action, data: data }) })
-        .then(response => response.json()).then(res => { if(onSuccess) onSuccess(res); })
-        .catch(err => { console.error("API Error:", err); if(onFailure) onFailure(err); });
-      }
+      // --- NAYA API CALL FUNCTION (LMS NET FIX) ---
+    function callBackend(action, data, onSuccess, onFailure) {
+      fetch(API_URL, {
+        redirect: "follow",
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+        body: JSON.stringify({ action: action, data: data })
+      })
+      .then(response => response.json())
+      .then(res => { if(onSuccess) onSuccess(res); })
+      .catch(err => {
+        console.error("Fetch Error:", err);
+        
+        // 🚀 YAHAN FIX HAI: Jaise hi Google API fail ho (Net band ho),
+        // Turant sab kuch chupao aur Offline screen dikha do!
+        document.getElementById('offlineScreen').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Piche ka page scroll na ho
+        
+        if(onFailure) onFailure(err);
+      });
+    }
 
       // --- SECURITY & PIN LOCK ---
       window.onload = function() {
+        // 🚀 SABSE PEHLE NET CHECK KARO
+        if (!navigator.onLine) {
+            document.getElementById('offlineScreen').style.display = 'flex';
+            return; // Aage ka koi dashboard load mat karo!
+        }
          let events = ['mousemove','keypress','touchstart','click','scroll'];
          events.forEach(e => document.addEventListener(e, () => { lastActivityTime = Date.now(); }, true));
          setInterval(checkInactivity, 10000); 
