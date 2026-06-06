@@ -149,6 +149,12 @@
     </style>
   </head>
   <body>
+    <div id="offlineScreen" style="display:none; text-align:center; padding:50px 20px; background:#f0f2f5; height:100vh; flex-direction:column; justify-content:center; align-items:center; z-index:999999; position:fixed; top:0; left:0; width:100%;">
+    <div style="font-size:60px; margin-bottom:10px;">📶</div>
+    <h1 style="color:#c0392b; margin-bottom:10px;">No Internet Connection</h1>
+    <p style="color:#7f8c8d; margin-bottom:25px; font-size:16px;">App chalane ke liye net connection zaroori hai. Kripya apna mobile data ya Wi-Fi on karein.</p>
+    <button id="reloadBtn" onclick="retryConnection()" style="width:auto; padding:14px 40px; background:#0f131c; color:white; border:none; border-radius:30px; font-size:16px; font-weight:bold; cursor:pointer;">↻ Reload</button>
+  </div>
 
     <div id="pinScreen">
       <div class="pin-header">
@@ -349,6 +355,34 @@
     <div id="idCardModal" class="modal-overlay"><div class="id-card-box" id="idCardContent"><div class="id-card-header"><h2 id="idc_libName">LIBRARY</h2><p id="idc_libAddress">Address</p><p id="idc_libContact">Contact</p></div><img id="idc_photo" class="id-card-photo" src=""><div class="id-card-details"><div><strong>Name:</strong> <span id="idc_name"></span></div><div><strong>ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div><div><strong>Guardian:</strong> <span id="idc_fname"></span></div><div><strong>Mobile:</strong> <span id="idc_mobile"></span></div><div><strong>Join:</strong> <span id="idc_join"></span></div></div><button class="print-btn btn-blue" onclick="window.print()" style="margin-top:20px;">Print ID</button><button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button><button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
 
     <script>
+      // --- SMART OFFLINE & RELOAD LOGIC ---
+    window.addEventListener('offline', () => {
+        document.getElementById('offlineScreen').style.display = 'flex';
+    });
+    window.addEventListener('online', () => window.location.reload());
+
+    function retryConnection() {
+      let btn = document.getElementById("reloadBtn");
+      btn.innerText = "Checking... ⏳";
+      
+      // Background mein invisible ping bhejna
+      fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' })
+      .then(() => {
+          btn.innerText = "Connecting... 🚀";
+          window.location.reload();
+      })
+      .catch(() => {
+          btn.innerText = "Still Offline! ❌";
+          btn.style.background = "#c0392b"; 
+          setTimeout(() => { 
+              btn.innerText = "↻ Reload"; 
+              btn.style.background = "#0f131c"; 
+          }, 2000);
+      });
+    }
+
+    // Aapke window.onload function ke andar sabse pehli line ye honi chahiye:
+    // if (!navigator.onLine) { document.getElementById('offlineScreen').style.display = 'flex'; return; }
       // 👇 YAHAN APNA GOOGLE APP SCRIPT WALA NAYA URL DALEIN 👇
       const API_URL = "https://script.google.com/macros/s/AKfycbzp9UKA8SnjkYuujjqmb3jjBXVU_rvL5ZzhNc88UFvv2A4iSY053265iu18NKdNQocW/exec";
       
