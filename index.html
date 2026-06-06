@@ -445,7 +445,13 @@
              lastActivityTime = Date.now();
          }
       });
-      function checkInactivity() { if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= TIMEOUT_MS) executeSystemLogout(); }
+      function checkInactivity() { 
+          // 30 Minutes = 1800000 milliseconds
+          if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= 1800000) { 
+              alert("30 minute tak koi activity na hone ke karan aap auto-logout ho gaye hain. Kripya dobara login karein.");
+              executeSystemLogout(); 
+          } 
+      }
 
       function showPinScreen() { document.getElementById("loginWrapper").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("pinScreen").style.display = "flex"; clearPinInputs(); document.getElementById("pin1").focus(); }
       function showLoginScreen() { document.getElementById("pinScreen").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("loginWrapper").style.display = "flex"; showLoginPanel(); }
