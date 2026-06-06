@@ -404,9 +404,9 @@
                   <div class="input-group"><label>Base</label><input type="number" id="f_baseFee" readonly></div>
                   <div class="input-group"><label>Date</label><input type="date" id="f_submitDate"></div>
                   <div class="input-group"><label>Mode</label><select id="f_payMode"><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Both">Both</option></select></div>
-                  <div id="splitPaymentDiv" style="display:none; width:100%; gap:10px; grid-column:span 2;">
-                      <div class="input-group" style="width:50%;"><label>Cash</label><input type="number" id="f_cashAmt"></div>
-                      <div class="input-group" style="width:50%;"><label>UPI</label><input type="number" id="f_upiAmt"></div>
+                  <div id="splitPaymentDiv" style="display:none; width:100%; gap:15px; grid-column:span 2; flex-direction:row;">
+                      <div class="input-group" style="flex:1; margin-bottom:0;"><label>Cash Amount</label><input type="number" id="f_cashAmt"></div>
+                      <div class="input-group" style="flex:1; margin-bottom:0;"><label>UPI Amount</label><input type="number" id="f_upiAmt"></div>
                   </div>
                   <div class="input-group"><label>Reg Fee</label><input type="number" id="f_regFee" value="0" oninput="calcTotalFee()"></div>
                   <div class="input-group"><label>Discount</label><input type="number" id="f_discount" value="0" oninput="calcTotalFee()"></div>
@@ -750,11 +750,32 @@
       function toggleStatus(row, nStatus) { callBackend("toggleStudentStatus", {rowIndex:row, status:nStatus}, r=>{loadStudentDetails(); loadDashboardData();}); }
       function deleteStudentBtn(row, id) { if(confirm("Delete "+id+"?")) callBackend("deleteStudent", {rowIndex:row, id:id}, r=>{loadStudentDetails(); loadDashboardData();}); }
 
-      function openUpdateModal(rIdx) { let st=globalStudents.find(s=>s.rowIndex==rIdx); if(!st) return; ["id","name","fname","aadhaar","join","due","mobile","altMobile","address","course","seat","shift","feePlan","discount","base"].forEach(k=>document.getElementById("upd_"+k).value=st[k=="join"?"joinDate":k=="due"?"dueDate":k=="base"?"baseFee":k]); document.getElementById("upd_rowIndex").value=st.rowIndex; showSection('sec-update-student', 'nav-studentList'); }
-      function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
+function openUpdateModal(rIdx) { 
+          showSection('sec-update-student', 'nav-studentList'); // Pehle page kholo
+          let st = globalStudents.find(s => s.rowIndex == rIdx); 
+          if(!st) return; 
+          // Phir data dalo
+          ["id","name","fname","aadhaar","join","due","mobile","altMobile","address","course","seat","shift","feePlan","discount","base"].forEach(k => {
+              let el = document.getElementById("upd_"+k);
+              if(el) el.value = st[k=="join"?"joinDate":k=="due"?"dueDate":k=="base"?"baseFee":k] || "";
+          }); 
+          document.getElementById("upd_rowIndex").value = st.rowIndex; 
+      }      function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
       function saveStudentUpdate() { let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); document.getElementById("updSaveBtn").innerHTML="Saving..."; callBackend("updateStudentData", d, r=>{document.getElementById("updSaveBtn").innerHTML="Save Updates"; showSection('sec-studentList', 'nav-studentList'); let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); showIdCard(document.getElementById("upd_id").value, {studentName:document.getElementById("upd_name").value, fatherName:document.getElementById("upd_fname").value, mobile:d.mobile, joinDate:document.getElementById("upd_join").value}, currentConfig, st?st.photo:"", "Update"); loadStudentDetails();}); }
-      function openRejoinModal(rIdx) { let st=globalStudents.find(s=>s.rowIndex==rIdx); if(!st) return; ["id","name","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k=>document.getElementById("rej_"+k).value=st[k]); document.getElementById("rej_rowIndex").value=st.rowIndex; document.getElementById("rej_due").value=new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; document.getElementById("rej_seat").value=""; calculateRejFee(); showSection('sec-rejoin-student', 'nav-studentList'); }
-      function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
+function openRejoinModal(rIdx) { 
+          showSection('sec-rejoin-student', 'nav-studentList'); // Pehle page kholo
+          let st = globalStudents.find(s => s.rowIndex == rIdx); 
+          if(!st) return; 
+          // Phir data dalo
+          ["id","name","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k => {
+              let el = document.getElementById("rej_"+k);
+              if(el) el.value = st[k] || "";
+          }); 
+          document.getElementById("rej_rowIndex").value = st.rowIndex; 
+          document.getElementById("rej_due").value = new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; 
+          document.getElementById("rej_seat").value = ""; 
+          calculateRejFee(); 
+      }      function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
       function saveRejoinStudent() { let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); document.getElementById("rejSaveBtn").innerHTML="Saving..."; callBackend("rejoinStudent", d, r=>{document.getElementById("rejSaveBtn").innerHTML="Rejoin"; showSection('sec-studentList', 'nav-studentList'); let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); showIdCard(document.getElementById("rej_id").value, {studentName:document.getElementById("rej_name").value, fatherName:st?st.fname:"", mobile:d.mobile, joinDate:fDate}, currentConfig, st?st.photo:"", "Rejoin"); loadStudentDetails(); loadDashboardData();}); }
 
       function searchStudent() { let q=document.getElementById("searchQuery").value.trim(); if(!q) return; document.getElementById("searchBtn").innerHTML="Searching..."; document.getElementById("f_submitDate").value=new Date().toISOString().split('T')[0]; callBackend("searchStudentForFee", {query:q}, res=>{document.getElementById("searchBtn").innerHTML="Search"; if(res.success){document.getElementById("feeFormBlock").style.display="block"; document.getElementById("f_stdId").value=res.id; document.getElementById("f_stdName").value=res.name; document.getElementById("f_dueDate").value=res.dueDate; document.getElementById("f_shift").value=res.shift; document.getElementById("f_feePlan").value=res.feePlan; currentFeeMobile=res.mobile||""; document.getElementById("f_regFee").value="0"; updateCollectFeePlan(); document.getElementById("f_baseFee").value=res.baseFee; calcTotalFee();} else {document.getElementById("feeFormBlock").style.display="none"; document.getElementById("searchMessage").innerHTML=`<span class='error'>${res.message}</span>`;}}); }
@@ -822,9 +843,14 @@
           let n=document.getElementById("idc_name").innerText, i=document.getElementById("idc_id").innerText, m=document.getElementById("idc_mobile").innerText, l=document.getElementById("idc_libName").innerText; 
           if(m && m.length===10) m="91"+m; 
           let msg=""; 
-          if(currentIdCardAction==="Update") msg=`Dear ${n},\nYour profile details for ID *${i}* have been updated in *${l}*.\n\nThank you!`; 
-          else if(currentIdCardAction==="Rejoin") msg=`Welcome back to *${l}*\n\nDear ${n},\nYour membership for ID *${i}* has been rejoined.\n\nThank you!`; 
-          else msg=`Welcome to *${l}*\n\nDear ${n},\nYour registration is successful. Your ID is *${i}*.\n\nThank you!`; 
+          
+          if(currentIdCardAction==="Update") {
+              msg=`*${l}*\n\nDear ${n},\nYour detail is successfully updated. Your ID is *${i}*.\n\nThank you!`; 
+          } else if(currentIdCardAction==="Rejoin") {
+              msg=`*${l}*\n\nDear ${n},\nYour rejoin is successful. Your ID is *${i}*.\n\nThank you!`; 
+          } else {
+              msg=`*${l}*\n\nDear ${n},\nYour registration is successful. Your ID is *${i}*.\n\nThank you!`; 
+          }
           window.open("https://wa.me/"+m+"?text="+encodeURIComponent(msg), "_blank"); 
       }
       
