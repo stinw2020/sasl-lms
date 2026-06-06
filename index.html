@@ -364,6 +364,7 @@
                     <div class="form-grid">
                         <div class="input-group"><label>ID</label><input type="text" id="rej_id" readonly></div>
                         <div class="input-group"><label>Name</label><input type="text" id="rej_name" readonly></div>
+                        <div class="input-group"><label>Guardian</label><input type="text" id="rej_fname" readonly></div>
                         <div class="input-group"><label>New Date</label><input type="date" id="rej_due"></div>
                         <div class="input-group"><label>Mobile</label><input type="text" id="rej_mobile" maxlength="10"></div>
                         <div class="input-group"><label>Alt Mobile</label><input type="text" id="rej_altMobile" maxlength="10"></div>
@@ -454,20 +455,57 @@
     <div id="idCardModal" class="modal-overlay"><div class="id-card-box" id="idCardContent"><div class="id-card-header"><h2 id="idc_libName">LIBRARY</h2><p id="idc_libAddress">Address</p><p id="idc_libContact">Contact</p></div><img id="idc_photo" class="id-card-photo" src=""><div class="id-card-details"><div><strong>Name:</strong> <span id="idc_name"></span></div><div><strong>ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div><div><strong>Guardian:</strong> <span id="idc_fname"></span></div><div><strong>Mobile:</strong> <span id="idc_mobile"></span></div><div><strong>Join:</strong> <span id="idc_join"></span></div></div><button class="print-btn btn-blue" onclick="downloadImage('idCardContent', 'ID_Card.jpg')" style="margin-top:20px;">Download / Print ID</button><button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button><button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
 
     <script>
-      // --- NAYA FUNCTION: DOWNLOAD AS IMAGE FOR WEBVIEW ---
+      // --- NAYA FUNCTION: SMART WEBVIEW IMAGE SHARE & SAVE ---
       function downloadImage(divId, fileName) {
+          let btnEl = event.target;
+          let originalText = btnEl.innerText;
+          btnEl.innerText = "⏳ Generating Image...";
+          
           let el = document.getElementById(divId);
-          // Buttons ko hide karo image lene se pehle
           let btns = el.querySelectorAll('button');
-          btns.forEach(b => b.style.display = 'none');
+          btns.forEach(b => b.style.display = 'none'); // Buttons chupao
           
           html2canvas(el, {scale: 2, useCORS: true}).then(canvas => {
-              let link = document.createElement('a');
-              link.download = fileName;
-              link.href = canvas.toDataURL('image/jpeg', 0.9);
-              link.click();
-              // Wapas dikhao buttons
+              btns.forEach(b => b.style.display = 'inline-block'); // Buttons wapas dikhao
+              btnEl.innerText = originalText;
+              
+              let imgData = canvas.toDataURL('image/jpeg', 0.9);
+              
+              // WebView ke andar photo dikhane ka aur Long Press / Share ka system
+              let previewDiv = document.createElement("div");
+              previewDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999999; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px;";
+              
+              previewDiv.innerHTML = `
+                  <h3 style="color:white; margin-bottom:10px; text-align:center;">Dabaaye Rakhein (Long Press) aur 'Save' karein</h3>
+                  <p style="color:#2ecc71; margin-top:0; font-size:13px; text-align:center;">Ya niche Share button par click karein</p>
+                  <img id="tempImgToShare" src="${imgData}" style="max-width:100%; max-height:65vh; border:3px solid white; border-radius:10px; margin-bottom:20px;">
+                  
+                  <div style="display:flex; gap:15px;">
+                      <button id="nativeShareBtn" style="background:#3498db; color:white; padding:12px 25px; border:none; border-radius:5px; font-weight:bold; font-size:16px;">↗ Share</button>
+                      <button onclick="this.parentElement.parentElement.remove()" style="background:#e74c3c; color:white; padding:12px 25px; border:none; border-radius:5px; font-weight:bold; font-size:16px;">✖ Close</button>
+                  </div>
+              `;
+              document.body.appendChild(previewDiv);
+
+              // Native Share API Logic (Direct WhatsApp ya dusri app par bhejne ke liye)
+              document.getElementById("nativeShareBtn").onclick = function() {
+                  canvas.toBlob(function(blob) {
+                      let file = new File([blob], fileName, { type: "image/jpeg" });
+                      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                          navigator.share({
+                              files: [file],
+                              title: fileName
+                          }).catch(err => console.log("Share failed", err));
+                      } else {
+                          alert("Aapke browser/app mein direct share support nahi hai. Kripya image par Long Press karke Download karein.");
+                      }
+                  }, "image/jpeg", 0.9);
+              };
+              
+          }).catch(err => {
               btns.forEach(b => b.style.display = 'inline-block');
+              btnEl.innerText = originalText;
+              alert("Error generating image.");
           });
       }
 
@@ -761,23 +799,63 @@ function openUpdateModal(rIdx) {
           }); 
           document.getElementById("upd_rowIndex").value = st.rowIndex; 
       }      function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
-      function saveStudentUpdate() { let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); document.getElementById("updSaveBtn").innerHTML="Saving..."; callBackend("updateStudentData", d, r=>{document.getElementById("updSaveBtn").innerHTML="Save Updates"; showSection('sec-studentList', 'nav-studentList'); let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); showIdCard(document.getElementById("upd_id").value, {studentName:document.getElementById("upd_name").value, fatherName:document.getElementById("upd_fname").value, mobile:d.mobile, joinDate:document.getElementById("upd_join").value}, currentConfig, st?st.photo:"", "Update"); loadStudentDetails();}); }
-function openRejoinModal(rIdx) { 
-          showSection('sec-rejoin-student', 'nav-studentList'); // Pehle page kholo
-          let st = globalStudents.find(s => s.rowIndex == rIdx); 
+function saveStudentUpdate() { 
+          let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
+          if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          document.getElementById("updSaveBtn").innerHTML="Saving..."; 
+          callBackend("updateStudentData", d, r=>{
+              document.getElementById("updSaveBtn").innerHTML="Save Updates"; 
+              showSection('sec-studentList', 'nav-studentList'); 
+              let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
+              
+              // FIX: Yahan poora data paas kiya gaya hai
+              showIdCard(
+                  document.getElementById("upd_id").value, 
+                  { studentName: document.getElementById("upd_name").value, fatherName: document.getElementById("upd_fname").value, mobile: d.mobile, joinDate: document.getElementById("upd_join").value }, 
+                  currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, 
+                  st?st.photo:"", 
+                  "Update"
+              ); 
+              loadStudentDetails();
+          }); 
+      }
+      function openRejoinModal(rIdx) { 
+          showSection('sec-rejoin-student', 'nav-studentList'); 
+          let st=globalStudents.find(s=>s.rowIndex==rIdx); 
           if(!st) return; 
-          // Phir data dalo
-          ["id","name","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k => {
+          // Yahan 'fname' add kiya gaya hai
+          ["id","name","fname","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k=> {
               let el = document.getElementById("rej_"+k);
               if(el) el.value = st[k] || "";
           }); 
-          document.getElementById("rej_rowIndex").value = st.rowIndex; 
-          document.getElementById("rej_due").value = new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; 
-          document.getElementById("rej_seat").value = ""; 
+          document.getElementById("rej_rowIndex").value=st.rowIndex; 
+          document.getElementById("rej_due").value=new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; 
+          document.getElementById("rej_seat").value=""; 
           calculateRejFee(); 
-      }      function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
-      function saveRejoinStudent() { let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); document.getElementById("rejSaveBtn").innerHTML="Saving..."; callBackend("rejoinStudent", d, r=>{document.getElementById("rejSaveBtn").innerHTML="Rejoin"; showSection('sec-studentList', 'nav-studentList'); let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); showIdCard(document.getElementById("rej_id").value, {studentName:document.getElementById("rej_name").value, fatherName:st?st.fname:"", mobile:d.mobile, joinDate:fDate}, currentConfig, st?st.photo:"", "Rejoin"); loadStudentDetails(); loadDashboardData();}); }
-
+      }
+      function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
+function saveRejoinStudent() { 
+          let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); 
+          let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; 
+          if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          document.getElementById("rejSaveBtn").innerHTML="Saving..."; 
+          callBackend("rejoinStudent", d, r=>{
+              document.getElementById("rejSaveBtn").innerHTML="Rejoin"; 
+              showSection('sec-studentList', 'nav-studentList'); 
+              let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
+              
+              // FIX: Yahan poora data paas kiya gaya hai
+              showIdCard(
+                  document.getElementById("rej_id").value, 
+                  { studentName: document.getElementById("rej_name").value, fatherName: document.getElementById("rej_fname").value, mobile: d.mobile, joinDate: fDate }, 
+                  currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, 
+                  st?st.photo:"", 
+                  "Rejoin"
+              ); 
+              loadStudentDetails(); 
+              loadDashboardData();
+          }); 
+      }
       function searchStudent() { let q=document.getElementById("searchQuery").value.trim(); if(!q) return; document.getElementById("searchBtn").innerHTML="Searching..."; document.getElementById("f_submitDate").value=new Date().toISOString().split('T')[0]; callBackend("searchStudentForFee", {query:q}, res=>{document.getElementById("searchBtn").innerHTML="Search"; if(res.success){document.getElementById("feeFormBlock").style.display="block"; document.getElementById("f_stdId").value=res.id; document.getElementById("f_stdName").value=res.name; document.getElementById("f_dueDate").value=res.dueDate; document.getElementById("f_shift").value=res.shift; document.getElementById("f_feePlan").value=res.feePlan; currentFeeMobile=res.mobile||""; document.getElementById("f_regFee").value="0"; updateCollectFeePlan(); document.getElementById("f_baseFee").value=res.baseFee; calcTotalFee();} else {document.getElementById("feeFormBlock").style.display="none"; document.getElementById("searchMessage").innerHTML=`<span class='error'>${res.message}</span>`;}}); }
       function updateCollectFeePlan() { let r=getShiftRates(document.getElementById("f_shift").value), pl=document.getElementById("f_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; document.getElementById("f_baseFee").value=b; let mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], dStr=document.getElementById("f_dueDate").value; if(dStr){let pts=dStr.split("/"); if(pts.length===3){let d=new Date(pts[2],pts[1]-1,pts[0]), sM=mn[d.getMonth()], yr=d.getFullYear(); if(pl==="Monthly") document.getElementById("f_month").value=sM+" "+yr; else if(pl==="Quarterly"){let d2=new Date(d);d2.setMonth(d2.getMonth()+2);document.getElementById("f_month").value=sM+" - "+mn[d2.getMonth()]+" "+yr;} else if(pl==="Half Yearly"){let d3=new Date(d);d3.setMonth(d3.getMonth()+5);document.getElementById("f_month").value=sM+" - "+mn[d3.getMonth()]+" "+yr;} else if(pl==="Yearly") document.getElementById("f_month").value=sM+" "+yr+" - "+sM+" "+(yr+1); else if(pl==="Demo") document.getElementById("f_month").value="Demo Period";}} calcTotalFee(); }
       function calcTotalFee() { document.getElementById("f_totalPaid").value = Math.max(0, (parseInt(document.getElementById("f_baseFee").value)||0)+(parseInt(document.getElementById("f_regFee").value)||0)-(parseInt(document.getElementById("f_discount").value)||0)); }
