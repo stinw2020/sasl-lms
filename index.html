@@ -432,10 +432,27 @@
          } else showLoginScreen();
       };
 
+      // Yahan ek naya flag banayenge
+      let isFilePickerOpen = false;
+
+      // Jab bhi koi file/photo upload button dabega, app ko pata chal jayega
+      document.addEventListener('click', function(e) {
+          if (e.target && e.target.type === 'file') {
+              isFilePickerOpen = true;
+          }
+      });
+
       // --- APP MINIMIZE SENSOR ---
       document.addEventListener("visibilitychange", () => {
          if(document.visibilityState === "visible" && localStorage.getItem("isLoggedIn") === "true") {
-             // App background se wapas aayi hai, net check karlo ek baar
+             
+             // Agar camera khula tha, toh PIN mat maango, bas flag reset kardo
+             if (isFilePickerOpen) {
+                 isFilePickerOpen = false;
+                 return;
+             }
+
+             // App background se wapas aayi hai, net check karlo
              if (!navigator.onLine) {
                  document.getElementById('offlineScreen').style.display = 'flex';
              } else {
@@ -537,6 +554,8 @@
       function toggleMobileMenu() { document.querySelector('.sidebar').classList.toggle('active'); document.getElementById('menu-overlay').classList.toggle('active'); }
       
       function showSection(sid, nid) {
+        // --- NAYI LINE: Dusre section mein jane par purane form saaf (reset) karna ---
+        document.querySelectorAll("form").forEach(form => form.reset());
         document.querySelectorAll('.section-view').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.nav-menu li').forEach(el=>el.classList.remove('active'));
         document.getElementById(sid).classList.add('active'); if(document.getElementById(nid)) document.getElementById(nid).classList.add('active');
         if(window.innerWidth<=768){document.querySelector('.sidebar').classList.remove('active'); let o=document.getElementById('menu-overlay'); if(o) o.classList.remove('active');}
