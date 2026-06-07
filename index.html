@@ -489,6 +489,64 @@
         </div>
       </div>
     </div>
+        <div id="customConfirmModal" class="modal-overlay" style="z-index: 1000000;">
+      <div class="modal-box" style="text-align:center; max-width: 320px; padding: 25px;">
+        <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+        <h3 style="margin-top:0; color:#2c3e50; font-size: 20px;">Confirm Action</h3>
+        <p id="confirmMessage" style="color:#555; margin-bottom: 25px; font-size:15px; font-weight: 500;"></p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button id="confirmYesBtn" class="btn-red" style="flex:1;" onclick="executeConfirmAction()">Yes, Delete</button>
+          <button onclick="closeConfirmModal()" class="btn-blue" style="flex:1;">Cancel</button>
+        </div>
+      </div>
+    </div>
+        // 🚀 CUSTOM CONFIRMATION LOGIC
+      let confirmActionCallback = null;
+
+      function showCustomConfirm(message, callback) {
+          document.getElementById("confirmMessage").innerText = message;
+          document.getElementById("customConfirmModal").style.display = "flex";
+          confirmActionCallback = callback;
+      }
+
+      function closeConfirmModal() {
+          document.getElementById("customConfirmModal").style.display = "none";
+          confirmActionCallback = null;
+      }
+
+      function executeConfirmAction() {
+          if (confirmActionCallback) confirmActionCallback();
+          closeConfirmModal();
+      }
+
+      // 🚀 UPDATED EXPENSE DELETE (No URL Alert)
+      function deleteExpense(idx, btnElement) { 
+          showCustomConfirm("Kya aap sach me is Expense ko delete karna chahte hain?", function() {
+              let oldText = btnElement.innerText;
+              btnElement.innerText = "⏳..."; 
+              btnElement.disabled = true;
+
+              callBackend("deleteExpense", { index: idx }, function(res) { 
+                  if(res.success) {
+                      loadExpenses(); 
+                  } else {
+                      alert("Delete Error: " + res.message);
+                      btnElement.innerText = oldText; 
+                      btnElement.disabled = false;
+                  }
+              }); 
+          });
+      }
+
+      // 🚀 UPDATED STUDENT DELETE (No URL Alert)
+      function deleteStudentBtn(row, id) { 
+          showCustomConfirm(`Kya aap sach me Student ID: ${id} ko delete karna chahte hain?`, function() {
+              callBackend("deleteStudent", { rowIndex: row, id: id }, function(r) {
+                  loadStudentDetails(); 
+                  loadDashboardData();
+              });
+          });
+      }
     <script>
       // ==========================================
       // 🚀 NAYA FUNCTION: DOWNLOAD AS IMAGE FIX
