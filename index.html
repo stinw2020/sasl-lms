@@ -986,29 +986,26 @@ function loadExpenses() {
           callBackend("getExpenseData", {fromDate:document.getElementById("filterExpFrom").value, toDate:document.getElementById("filterExpTo").value}, list=>{ 
               let tb=document.getElementById("expenseBody"); 
               tb.innerHTML=""; 
-              list.forEach((e)=>{
-                  // 🚀 FIX: Index ki jagah backend se aa rahe asli s.rowIndex ya e.rowIndex ko use karenge
+              list.forEach((e)=>{ // Loop index 'i' hata diya gaya
+                  // 🚀 FIX: e.rowIndex seedha pass kar rahe hain
                   tb.innerHTML+=`<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${currentUserRole==='Admin'?`<button onclick='deleteExpense(${e.rowIndex})' class='btn-red' style='padding:2px 8px;'>Del</button>`:''}</td></tr>`;
               }); 
           }); 
-      }     
-// 🚀 FIX: Expense Delete System with Exact RowIndex
+      }
+
       function deleteExpense(rowIdx) { 
           if(confirm("Kya aap sach me is Expense ko delete karna chahte hain?")) {
-              // Button ko loading status par daalein
               let btn = event.target;
               let oldText = btn.innerText;
-              btn.innerText = "⏳...";
-              btn.disabled = true;
+              btn.innerText = "⏳..."; btn.disabled = true;
 
-              callBackend("deleteExpense", { rowIndex: rowIdx }, function(r) {
-                  if(r.success || r) {
-                      alert("Expense kamiyabi se delete ho gaya!");
-                      loadExpenses(); // List ko fresh reload karein
+              // 🚀 FIX: Backend ko exact sheet row index bhej rahe hain
+              callBackend("deleteExpense", { rowIndex: rowIdx }, function(res) {
+                  if(res.success) {
+                      loadExpenses(); // Delete hone ke baad list update
                   } else {
-                      alert("Delete karne me koi dikkat aayi.");
-                      btn.innerText = oldText;
-                      btn.disabled = false;
+                      alert("Delete error: " + res.message);
+                      btn.innerText = oldText; btn.disabled = false;
                   }
               });
           }
