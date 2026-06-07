@@ -982,17 +982,46 @@ function submitExpense() {
               }
           }); 
       }
-function loadExpenses() {
-        var f = document.getElementById("filterExpFrom").value, t = document.getElementById("filterExpTo").value;
-        google.script.run.withSuccessHandler(function(list) {
-          var tbody = document.getElementById("expenseBody"); tbody.innerHTML = "";
-          list.forEach(function(e, index) { 
-             var actionBtn = currentUserRole === 'Admin' ? "<button onclick='deleteExpense(" + index + ")' class='btn-red' style='padding:2px 8px; margin-left:5px;'>Del</button>" : "";
-             tbody.innerHTML += "<tr><td>" + e.date + "</td><td>" + e.cat + "</td><td>₹" + e.amt + "</td><td>" + e.desc + "</td><td>" + actionBtn + "</td></tr>";
+// 🚀 FIX: GITHUB PAGES EXPENSE LOGIC (Using callBackend instead of google.script.run)
+      function loadExpenses() {
+          let f = document.getElementById("filterExpFrom").value;
+          let t = document.getElementById("filterExpTo").value;
+          
+          callBackend("getExpenseData", { fromDate: f, toDate: t }, function(list) {
+              let tbody = document.getElementById("expenseBody"); 
+              tbody.innerHTML = "";
+              
+              if(!list || list.length === 0) {
+                  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>No Expenses Found</td></tr>";
+                  return;
+              }
+              
+              list.forEach(function(e, index) { 
+                 // Backend(Code.gs) exactly index dhoondh raha hai, toh hum yahan se index hi bhejenge
+                 let actionBtn = currentUserRole === 'Admin' ? `<button onclick='deleteExpense(${index}, this)' class='btn-red' style='padding:2px 8px; margin-left:5px;'>Del</button>` : "";
+                 tbody.innerHTML += `<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${actionBtn}</td></tr>`;
+              });
           });
-        }).getExpenseData(f, t);
       }
-      function deleteExpense(index) { if(!confirm("Are you sure?")) return; google.script.run.withSuccessHandler(function(r) { loadExpenses(); }).deleteExpense(index); }
+
+      function deleteExpense(idx, btnElement) { 
+          if(!confirm("Kya aap sach me is Expense ko delete karna chahte hain?")) return; 
+          
+          let oldText = btnElement.innerText;
+          btnElement.innerText = "⏳..."; 
+          btnElement.disabled = true;
+
+          // 🎯 GitHub se data Code.gs ko bhejne ke liye callBackend ka proper use
+          callBackend("deleteExpense", { index: idx }, function(res) { 
+              if(res.success) {
+                  loadExpenses(); // Delete hote hi list ko refresh karein
+              } else {
+                  alert("Delete Error: " + res.message);
+                  btnElement.innerText = oldText; 
+                  btnElement.disabled = false;
+              }
+          }); 
+      }
       function loadPendingFees() { let tb=document.getElementById("pendingBody"); tb.innerHTML="<tr><td colspan='7'>Loading...</td></tr>"; callBackend("getPendingFees", {}, list=>{ tb.innerHTML=""; if(!list||list.length===0) return tb.innerHTML="<tr><td colspan='7'>No pending fees.</td></tr>"; let tDay=new Date(); tDay.setHours(0,0,0,0); list.forEach(s=>{s.diffDays=0; if(s.dueDate){let dp=s.dueDate.split("/"); if(dp.length===3){let due=new Date(dp[2],dp[1]-1,dp[0]); due.setHours(0,0,0,0); s.diffDays=Math.floor((tDay.getTime()-due.getTime())/(1000*60*60*24));}} }); list.sort((a,b)=>b.diffDays-a.diffDays); list.forEach(s=>{ tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mobile}</td><td><b style='color:red;'>${s.dueDate}</b></td><td><b style='color:#e67e22;'>${s.diffDays} Days</b></td><td>₹${s.amount}</td><td><a href='https://wa.me/91${s.mobile}?text=${encodeURIComponent(`*${currentConfig?currentConfig.name:"Library"}*\n\nDear ${s.name},\nYour fee is pending since ${s.dueDate} (${s.diffDays} days ago). Please submit your fee.\n\nThank you!`)}' target='_blank' class='btn-green' style='padding:5px 10px; text-decoration:none;'>WhatsApp</a></td></tr>`; }); }); }
       function loadNoticeBoard() { let fs=document.getElementById("noticeShiftFilter").value, ft=document.getElementById("noticeStatusFilter").value, tb=document.getElementById("noticeBody"); tb.innerHTML="<tr><td colspan='5'>Loading...</td></tr>"; callBackend("getStudentDetails", {}, list=>{tb.innerHTML=""; let c=0; list.forEach(s=>{if((ft==="All"||s.status===ft)&&(fs==="All"||s.shift===fs)){tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.shift}</td><td style='color:${s.status==="Active"?"green":"red"};font-weight:bold;'>${s.status}</td><td><button class='btn-green' style='padding:5px 10px;' onclick="sendNotice('${s.mobile}','${s.name}')">Message</button></td></tr>`; c++;}}); if(c===0) tb.innerHTML="<tr><td colspan='5' style='color:red;'>No students.</td></tr>";}); }
       function sendNotice(mob, name) { let cm=document.getElementById("customNoticeMsg").value.trim(), l=currentConfig?currentConfig.name:"Library", t=cm!==""?cm:"Please check the notice board for updates.", msg=`*${l} - Notice*\n\nDear ${name},\n${t}\n\nThank you!`; window.open("https://wa.me/91"+mob+"?text="+encodeURIComponent(msg), "_blank"); }
