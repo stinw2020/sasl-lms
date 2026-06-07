@@ -573,8 +573,8 @@
 
       // 🚀 FIX: PIN LOGIC BACKSPACE JUMP FIX & DISPLAY ISSUE
       function showPinScreen() { 
+          // Yahan se dashboardDiv ko hide karna hata diya gaya hai, taaki current page wahi rahe
           document.getElementById("loginWrapper").style.display = "none"; 
-          document.getElementById("dashboardDiv").style.display = "none"; 
           let ps = document.getElementById("pinScreen");
           ps.style.display = "flex"; 
           ps.style.zIndex = "999999";
@@ -598,10 +598,24 @@
          let ent = document.getElementById("pin1").value+document.getElementById("pin2").value+document.getElementById("pin3").value+document.getElementById("pin4").value;
          if(ent.length < 4) return;
          document.getElementById("pinActionBtn").innerText = "Verifying...";
+         
          setTimeout(() => {
              document.getElementById("pinActionBtn").innerText = "Unlock Portal";
-             if(ent === localStorage.getItem("appPin")) { document.getElementById("pinScreen").style.display = "none"; document.getElementById("pinScreen").style.zIndex = "-1"; loadWorkspace(); } 
-             else { document.getElementById("pinErrMsg").innerText = "Incorrect PIN!"; clearPinInputs(); document.getElementById("pin1").focus(); }
+             if(ent === localStorage.getItem("appPin")) { 
+                 // PIN Screen hatao aur piche wali screen show hone do
+                 document.getElementById("pinScreen").style.display = "none"; 
+                 document.getElementById("pinScreen").style.zIndex = "-1"; 
+                 
+                 // Agar app just start hui hai, tabhi loadWorkspace chale, warna wahi rahe jahan tha
+                 if (document.getElementById("dashboardDiv").style.display !== "flex") {
+                     loadWorkspace(); 
+                 }
+             } 
+             else { 
+                 document.getElementById("pinErrMsg").innerText = "Incorrect PIN!"; 
+                 clearPinInputs(); 
+                 document.getElementById("pin1").focus(); 
+             }
          }, 400);
       }
       function executeSystemLogout() { localStorage.removeItem("isLoggedIn"); currentUserRole = "User"; currentUserId = ""; showLoginScreen(); }
@@ -668,10 +682,14 @@
       
       function toggleMobileMenu() { document.querySelector('.sidebar').classList.toggle('active'); document.getElementById('menu-overlay').classList.toggle('active'); }
       
-      // 🚀 FIX: FORM AUTO-RESET JAB TAB CHANGE HO
+      // 🚀 FIX: FORM AUTO-RESET JAB TAB CHANGE HO (Search Box ke sath)
       function showSection(sid, nid) {
         document.querySelectorAll("form").forEach(f => f.reset());
-        if(document.getElementById('feeFormBlock')) document.getElementById('feeFormBlock').style.display = 'none'; // Fee div hide
+        
+        // Fee Collection ke extra fields manually clear karein
+        if(document.getElementById("searchQuery")) document.getElementById("searchQuery").value = "";
+        if(document.getElementById("searchMessage")) document.getElementById("searchMessage").innerHTML = "";
+        if(document.getElementById('feeFormBlock')) document.getElementById('feeFormBlock').style.display = 'none';
         
         document.querySelectorAll('.section-view').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.nav-menu li').forEach(el=>el.classList.remove('active'));
         document.getElementById(sid).classList.add('active'); if(document.getElementById(nid)) document.getElementById(nid).classList.add('active');
