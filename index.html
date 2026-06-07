@@ -439,8 +439,26 @@
     
     <div id="receiptModal" class="modal-overlay"><div class="receipt-box" id="receiptContent"><input type="hidden" id="r_mobile"><h2 style="margin-top:0; border-bottom:1px dashed #333; padding-bottom:10px; text-align:center;">FEE RECEIPT</h2><div class="receipt-row"><span>Receipt No:</span><strong id="r_no"></strong></div><div class="receipt-row"><span>Date:</span><strong id="r_date"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>ID:</span><strong id="r_id"></strong></div><div class="receipt-row"><span>Name:</span><strong id="r_name"></strong></div><div class="receipt-row"><span>Period:</span><strong id="r_month"></strong></div><div class="receipt-row"><span>Mode:</span><strong id="r_mode"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Base:</span><strong id="r_base"></strong></div><div class="receipt-row"><span>Reg. Fee:</span><strong id="r_regFee"></strong></div><div class="receipt-row"><span>Disc:</span><strong id="r_disc"></strong></div><div style="border-bottom:2px solid #333; margin:10px 0;"></div><div class="receipt-row" style="font-size:18px; font-weight:bold;"><span>Total Paid:</span><strong id="r_total"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Next Due:</span><strong id="r_nextDue"></strong></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'receiptContent', 'Fee_Receipt.jpg')" style="margin-top:15px;">Download / Print Receipt</button><button class="print-btn btn-green" onclick="sendWhatsappReceipt()" style="margin-top:10px;">WhatsApp Receipt</button><button class="print-btn btn-red" onclick="document.getElementById('receiptModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
     
-    <div id="idCardModal" class="modal-overlay"><div class="id-card-box" id="idCardContent"><div class="id-card-header"><h2 id="idc_libName">LIBRARY</h2><p id="idc_libAddress">Address</p><p id="idc_libContact">Contact</p></div><img id="idc_photo" class="id-card-photo" src=""><div class="id-card-details"><div><strong>Name:</strong> <span id="idc_name"></span></div><div><strong>ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div><div><strong>Guardian:</strong> <span id="idc_fname"></span></div><div><strong>Mobile:</strong> <span id="idc_mobile"></span></div><div><strong>Join:</strong> <span id="idc_join"></span></div></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'idCardContent', 'Student_ID_Card.jpg')" style="margin-top:20px;">Download / Print ID</button><button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button><button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
-
+<div id="idCardModal" class="modal-overlay">
+      <div class="id-card-box" id="idCardContent">
+        <div class="id-card-header">
+          <h2 id="idc_libName" style="color: #2c3e50; font-size: 20px; font-weight: bold;">SANKALP A SMART LIBRARY</h2>
+          <p id="idc_libAddress">Address</p>
+          <p id="idc_libContact">Contact</p>
+        </div>
+        <img id="idc_photo" class="id-card-photo" src="">
+        <div class="id-card-details">
+          <div><strong>Student Name:</strong> <span id="idc_name"></span></div>
+          <div><strong>Student ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div>
+          <div><strong>Guardian Name:</strong> <span id="idc_fname"></span></div>
+          <div><strong>Mobile No:</strong> <span id="idc_mobile"></span></div>
+          <div><strong>Joining Date:</strong> <span id="idc_join"></span></div>
+        </div>
+        <button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'idCardContent', 'Student_ID_Card.jpg')" style="margin-top:20px;">Download / Print ID</button>
+        <button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button>
+        <button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button>
+      </div>
+    </div>
     <script>
       // ==========================================
       // 🚀 NAYA FUNCTION: DOWNLOAD AS IMAGE FIX
@@ -836,13 +854,25 @@
       
       // 🚀 FIX: PERFECT WHATSAPP MESSAGING
       function sendWhatsappWelcome() { 
-          let n=document.getElementById("idc_name").innerText, i=document.getElementById("idc_id").innerText, m=document.getElementById("idc_mobile").innerText, l=document.getElementById("idc_libName").innerText, g=document.getElementById("idc_fname").innerText; 
-          if(m&&m.length===10) m="91"+m; 
-          let msg=""; 
-          if(currentIdCardAction==="Update") msg=`*${l}*\n\nDear ${n},\nYour profile details have been successfully updated.\n\n*ID:* ${i}\n*Guardian:* ${g}\n*Mobile:* ${m.replace('91','')}\n\nThank you!`; 
-          else if(currentIdCardAction==="Rejoin") msg=`*${l}*\n\nDear ${n},\nWelcome back! Your rejoin is successful.\n\n*ID:* ${i}\n*Guardian:* ${g}\n*Mobile:* ${m.replace('91','')}\n\nThank you!`; 
-          else msg=`*${l}*\n\nDear ${n},\nYour registration is successful!\n\n*ID:* ${i}\n*Guardian:* ${g}\n*Mobile:* ${m.replace('91','')}\n\nThank you!`; 
-          window.open("https://wa.me/"+m+"?text="+encodeURIComponent(msg), "_blank"); 
+          let n = document.getElementById("idc_name").innerText;
+          let i = document.getElementById("idc_id").innerText;
+          let m = document.getElementById("idc_mobile").innerText;
+          // Mobile number ko 91 format me laana
+          if(m && m.length === 10) m = "91" + m; 
+          
+          let msg = ""; 
+          
+          if(currentIdCardAction === "Update") {
+              msg = `Dear ${n},\nYour profile details have been successfully updated. Your student ID is *${i}*.\n\nThank you!`; 
+          } 
+          else if(currentIdCardAction === "Rejoin") {
+              msg = `Welcome back! Your rejoin is successful.\n\nDear ${n},\nYour student ID is *${i}*.\n\nThank you!`; 
+          } 
+          else {
+              msg = `Welcome to *SANKALP A SMART LIBRARY*\n\nDear ${n},\nYour registration is successful. Your student ID is *${i}*.\n\nThank you!`; 
+          }
+          
+          window.open("https://wa.me/" + m + "?text=" + encodeURIComponent(msg), "_blank"); 
       }
       
       function sendWhatsappReceipt() { let mob=document.getElementById("r_mobile").value; if(mob&&mob.length===10) mob="91"+mob; let msg=`*${currentConfig?currentConfig.name:"Library"} - Fee Receipt*\n\nReceipt No: ${document.getElementById("r_no").innerText}\nID: ${document.getElementById("r_id").innerText}\nName: ${document.getElementById("r_name").innerText}\nPeriod: ${document.getElementById("r_month").innerText}\nBase Fee: ${document.getElementById("r_base").innerText}\nDiscount: ${document.getElementById("r_disc").innerText}\nTotal Paid: *${document.getElementById("r_total").innerText}*\nNext Due Date: ${document.getElementById("r_nextDue").innerText}\n\nThank you!`; window.open("https://wa.me/"+mob+"?text="+encodeURIComponent(msg), "_blank"); }
