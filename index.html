@@ -682,7 +682,7 @@
       
       function toggleMobileMenu() { document.querySelector('.sidebar').classList.toggle('active'); document.getElementById('menu-overlay').classList.toggle('active'); }
       
-      // 🚀 FIX: FORM AUTO-RESET JAB TAB CHANGE HO (Search Box ke sath)
+      // 🚀 FIX: NOTICE BOARD TEXTBOX CLEAR LOGIC ADDED IN SHOWSECTION
       function showSection(sid, nid) {
         document.querySelectorAll("form").forEach(f => f.reset());
         
@@ -690,6 +690,9 @@
         if(document.getElementById("searchQuery")) document.getElementById("searchQuery").value = "";
         if(document.getElementById("searchMessage")) document.getElementById("searchMessage").innerHTML = "";
         if(document.getElementById('feeFormBlock')) document.getElementById('feeFormBlock').style.display = 'none';
+        
+        // 🎯 NAYI LINE: Notice Board ka Custom Message box bhi dusre page par jaane par clear ho jaye
+        if(document.getElementById("customNoticeMsg")) document.getElementById("customNoticeMsg").value = "";
         
         document.querySelectorAll('.section-view').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.nav-menu li').forEach(el=>el.classList.remove('active'));
         document.getElementById(sid).classList.add('active'); if(document.getElementById(nid)) document.getElementById(nid).classList.add('active');
