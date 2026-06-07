@@ -982,27 +982,17 @@ function submitExpense() {
               }
           }); 
       }
-// GitHub file ke andar ye functions replace karein
-function loadExpenses() { 
-    callBackend("getExpenseData", {fromDate:document.getElementById("filterExpFrom").value, toDate:document.getElementById("filterExpTo").value}, list=>{ 
-        let tb = document.getElementById("expenseBody"); 
-        tb.innerHTML = ""; 
-        list.forEach((e) => { 
-            // Backend se aa raha e.rowIndex yahan use hoga
-            tb.innerHTML += `<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${currentUserRole==='Admin'?`<button onclick='deleteExpense(${e.rowIndex})' class='btn-red' style='padding:2px 8px;'>Del</button>`:''}</td></tr>`;
-        }); 
-    }); 
-}
-
-function deleteExpense(rowIdx) { 
-    if(confirm("Delete Expense?")) {
-        // Backend 'deleteExpense' function ko rowIdx bhej rahe hain
-        callBackend("deleteExpense", { rowIndex: rowIdx }, function(res) {
-            if(res.success) loadExpenses();
-            else alert(res.message);
-        });
-    }
-}
+function loadExpenses() {
+        var f = document.getElementById("filterExpFrom").value, t = document.getElementById("filterExpTo").value;
+        google.script.run.withSuccessHandler(function(list) {
+          var tbody = document.getElementById("expenseBody"); tbody.innerHTML = "";
+          list.forEach(function(e, index) { 
+             var actionBtn = currentUserRole === 'Admin' ? "<button onclick='deleteExpense(" + index + ")' class='btn-red' style='padding:2px 8px; margin-left:5px;'>Del</button>" : "";
+             tbody.innerHTML += "<tr><td>" + e.date + "</td><td>" + e.cat + "</td><td>₹" + e.amt + "</td><td>" + e.desc + "</td><td>" + actionBtn + "</td></tr>";
+          });
+        }).getExpenseData(f, t);
+      }
+      function deleteExpense(index) { if(!confirm("Are you sure?")) return; google.script.run.withSuccessHandler(function(r) { loadExpenses(); }).deleteExpense(index); }
       function loadPendingFees() { let tb=document.getElementById("pendingBody"); tb.innerHTML="<tr><td colspan='7'>Loading...</td></tr>"; callBackend("getPendingFees", {}, list=>{ tb.innerHTML=""; if(!list||list.length===0) return tb.innerHTML="<tr><td colspan='7'>No pending fees.</td></tr>"; let tDay=new Date(); tDay.setHours(0,0,0,0); list.forEach(s=>{s.diffDays=0; if(s.dueDate){let dp=s.dueDate.split("/"); if(dp.length===3){let due=new Date(dp[2],dp[1]-1,dp[0]); due.setHours(0,0,0,0); s.diffDays=Math.floor((tDay.getTime()-due.getTime())/(1000*60*60*24));}} }); list.sort((a,b)=>b.diffDays-a.diffDays); list.forEach(s=>{ tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mobile}</td><td><b style='color:red;'>${s.dueDate}</b></td><td><b style='color:#e67e22;'>${s.diffDays} Days</b></td><td>₹${s.amount}</td><td><a href='https://wa.me/91${s.mobile}?text=${encodeURIComponent(`*${currentConfig?currentConfig.name:"Library"}*\n\nDear ${s.name},\nYour fee is pending since ${s.dueDate} (${s.diffDays} days ago). Please submit your fee.\n\nThank you!`)}' target='_blank' class='btn-green' style='padding:5px 10px; text-decoration:none;'>WhatsApp</a></td></tr>`; }); }); }
       function loadNoticeBoard() { let fs=document.getElementById("noticeShiftFilter").value, ft=document.getElementById("noticeStatusFilter").value, tb=document.getElementById("noticeBody"); tb.innerHTML="<tr><td colspan='5'>Loading...</td></tr>"; callBackend("getStudentDetails", {}, list=>{tb.innerHTML=""; let c=0; list.forEach(s=>{if((ft==="All"||s.status===ft)&&(fs==="All"||s.shift===fs)){tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.shift}</td><td style='color:${s.status==="Active"?"green":"red"};font-weight:bold;'>${s.status}</td><td><button class='btn-green' style='padding:5px 10px;' onclick="sendNotice('${s.mobile}','${s.name}')">Message</button></td></tr>`; c++;}}); if(c===0) tb.innerHTML="<tr><td colspan='5' style='color:red;'>No students.</td></tr>";}); }
       function sendNotice(mob, name) { let cm=document.getElementById("customNoticeMsg").value.trim(), l=currentConfig?currentConfig.name:"Library", t=cm!==""?cm:"Please check the notice board for updates.", msg=`*${l} - Notice*\n\nDear ${name},\n${t}\n\nThank you!`; window.open("https://wa.me/91"+mob+"?text="+encodeURIComponent(msg), "_blank"); }
