@@ -741,13 +741,23 @@
       function saveStudentUpdate() { 
           let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          
+          // 🚀 FIX: Section change (Form Reset) hone se pehle data save karo!
+          let studentIdToPass = document.getElementById("upd_id").value;
+          let fullDataToPass = {
+              studentName: document.getElementById("upd_name").value, 
+              fatherName: document.getElementById("upd_fname").value, 
+              mobile: d.mobile, 
+              joinDate: document.getElementById("upd_join").value
+          };
+
           let btn = document.getElementById("updSaveBtn"); btn.innerHTML="Saving..."; 
           callBackend("updateStudentData", d, r=>{
               btn.innerHTML="Save Updates"; 
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              let fullData = {studentName:document.getElementById("upd_name").value, fatherName:document.getElementById("upd_fname").value, mobile:d.mobile, joinDate:document.getElementById("upd_join").value};
-              showSection('sec-studentList', 'nav-studentList'); 
-              showIdCard(document.getElementById("upd_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
+              showSection('sec-studentList', 'nav-studentList'); // Ye form clear karega
+              // ID Card ko safe rakha hua data bhejo
+              showIdCard(studentIdToPass, fullDataToPass, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
               loadStudentDetails();
           }); 
       }
@@ -774,13 +784,23 @@
           let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); 
           let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; 
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          
+          // 🚀 FIX: Section change (Form Reset) hone se pehle data save karo!
+          let studentIdToPass = document.getElementById("rej_id").value;
+          let fullDataToPass = {
+              studentName: document.getElementById("rej_name").value, 
+              fatherName: document.getElementById("rej_fname").value, 
+              mobile: d.mobile, 
+              joinDate: fDate
+          };
+
           let btn = document.getElementById("rejSaveBtn"); btn.innerHTML="Saving..."; 
           callBackend("rejoinStudent", d, r=>{
               btn.innerHTML="Rejoin";  
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              let fullData = {studentName:document.getElementById("rej_name").value, fatherName:document.getElementById("rej_fname").value, mobile:d.mobile, joinDate:fDate};
-              showSection('sec-studentList', 'nav-studentList');
-              showIdCard(document.getElementById("rej_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Rejoin"); 
+              showSection('sec-studentList', 'nav-studentList'); // Ye form clear karega
+              // ID Card ko safe rakha hua data bhejo
+              showIdCard(studentIdToPass, fullDataToPass, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Rejoin"); 
               loadStudentDetails(); loadDashboardData();
           }); 
       }
