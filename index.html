@@ -22,8 +22,7 @@
       * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
       body { background-color: #f4f7fc; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
       
-      #pinScreen { display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f131c; color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
-      .pin-header h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; letter-spacing: 0.5px; }
+#pinScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f131c; color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }      .pin-header h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; letter-spacing: 0.5px; }
       .pin-header p { margin: 0 0 30px 0; color: #7f8c8d; font-size: 14px; }
       .pin-container { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
       .pin-box { width: 55px; height: 55px; font-size: 28px; text-align: center; border: 2px solid #34495e; background: #1a252f; color: white; border-radius: 10px; outline: none; transition: 0.2s; font-weight: bold; }
@@ -519,10 +518,15 @@
       function checkInactivity() { if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= 1800000) { alert("30 minute tak koi activity na hone ke karan aap auto-logout ho gaye hain. Kripya dobara login karein."); executeSystemLogout(); } }
 
       // 🚀 FIX: PIN LOGIC BACKSPACE JUMP FIX
-      function showPinScreen() { document.getElementById("loginWrapper").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("pinScreen").style.display = "flex"; clearPinInputs(); document.getElementById("pin1").focus(); }
-      function showLoginScreen() { document.getElementById("pinScreen").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("loginWrapper").style.display = "flex"; showLoginPanel(); }
-      
-      function movePinFocus(curr, nextID) { 
+      function showPinScreen() { 
+          document.getElementById("loginWrapper").style.display = "none"; 
+          document.getElementById("dashboardDiv").style.display = "none"; 
+          let ps = document.getElementById("pinScreen");
+          ps.style.display = "flex"; 
+          ps.style.zIndex = "999999"; // Reset z-index
+          clearPinInputs(); 
+          document.getElementById("pin1").focus(); 
+      }
           if(curr.value.length === 1) { 
               if(nextID === 'verify') processPinVerification(); 
               else document.getElementById(nextID).focus(); 
@@ -694,9 +698,34 @@
       function toggleStatus(row, nStatus) { callBackend("toggleStudentStatus", {rowIndex:row, status:nStatus}, r=>{loadStudentDetails(); loadDashboardData();}); }
       function deleteStudentBtn(row, id) { if(confirm("Delete "+id+"?")) callBackend("deleteStudent", {rowIndex:row, id:id}, r=>{loadStudentDetails(); loadDashboardData();}); }
 
-      function openUpdateModal(rIdx) { let st=globalStudents.find(s=>s.rowIndex==rIdx); if(!st) return; ["id","name","fname","aadhaar","join","due","mobile","altMobile","address","course","seat","shift","feePlan","discount","base"].forEach(k=>document.getElementById("upd_"+k).value=st[k=="join"?"joinDate":k=="due"?"dueDate":k=="base"?"baseFee":k]); document.getElementById("upd_rowIndex").value=st.rowIndex; showSection('sec-update-student', 'nav-studentList'); }
-      function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
-      
+      function openUpdateModal(rIdx) { 
+          showSection('sec-update-student', 'nav-studentList'); // 🚀 FIX: Pehle form kholo aur purana data saaf hone do
+          let st=globalStudents.find(s=>s.rowIndex==rIdx); 
+          if(!st) return; 
+          
+          // 🚀 FIX: Ab form mein naya data dalo
+          ["id","name","fname","aadhaar","join","due","mobile","altMobile","address","course","seat","shift","feePlan","discount","base"].forEach(k=>{
+              let el=document.getElementById("upd_"+k); 
+              if(el) el.value=st[k=="join"?"joinDate":k=="due"?"dueDate":k=="base"?"baseFee":k]||"";
+          }); 
+          document.getElementById("upd_rowIndex").value=st.rowIndex; 
+      }
+
+      function openRejoinModal(rIdx) { 
+          showSection('sec-rejoin-student', 'nav-studentList'); // 🚀 FIX: Pehle form kholo
+          let st=globalStudents.find(s=>s.rowIndex==rIdx); 
+          if(!st) return; 
+          
+          // 🚀 FIX: Ab form mein naya data dalo
+          ["id","name","fname","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k=>{
+              let el=document.getElementById("rej_"+k); 
+              if(el) el.value=st[k]||"";
+          }); 
+          document.getElementById("rej_rowIndex").value=st.rowIndex; 
+          document.getElementById("rej_due").value=new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; 
+          document.getElementById("rej_seat").value=""; 
+          calculateRejFee(); 
+      }
       // 🚀 FIX: FULL DATA PASSED TO ID CARD ON UPDATE
       function saveStudentUpdate() { 
           let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
