@@ -512,11 +512,23 @@
       };
 
       document.addEventListener("visibilitychange", () => {
+        let isCameraOpen = false;
+      document.addEventListener('click', function(e) {
+          if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'file') {
+              isCameraOpen = true;
+              setTimeout(() => { isCameraOpen = false; }, 60000); // 1 minute auto-reset
+          }
+      });
+
+      document.addEventListener("visibilitychange", () => {
          if(document.visibilityState === "visible" && localStorage.getItem("isLoggedIn") === "true") {
+             if (isCameraOpen) {
+                 isCameraOpen = false; // Camera se aaye hain, PIN mat maango
+                 return;
+             }
              if (!navigator.onLine) { document.getElementById('offlineScreen').style.display = 'flex'; } else { showPinScreen(); }
          } else { lastActivityTime = Date.now(); }
       });
-      
       function checkInactivity() { if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= 1800000) { alert("30 minute tak koi activity na hone ke karan aap auto-logout ho gaye hain. Kripya dobara login karein."); executeSystemLogout(); } }
 
       // 🚀 FIX: PIN LOGIC BACKSPACE JUMP FIX & DISPLAY ISSUE
@@ -542,13 +554,21 @@
       }
       
       function clearPinInputs() { ["pin1","pin2","pin3","pin4"].forEach(id=>document.getElementById(id).value=""); document.getElementById("pinErrMsg").innerText = ""; }
-      function processPinVerification() {
+     function processPinVerification() {
          let ent = document.getElementById("pin1").value+document.getElementById("pin2").value+document.getElementById("pin3").value+document.getElementById("pin4").value;
          if(ent.length < 4) return;
          document.getElementById("pinActionBtn").innerText = "Verifying...";
          setTimeout(() => {
              document.getElementById("pinActionBtn").innerText = "Unlock Portal";
-             if(ent === localStorage.getItem("appPin")) { document.getElementById("pinScreen").style.display = "none"; document.getElementById("pinScreen").style.zIndex = "-1"; loadWorkspace(); } 
+             if(ent === localStorage.getItem("appPin")) { 
+                 document.getElementById("pinScreen").style.display = "none"; 
+                 document.getElementById("pinScreen").style.zIndex = "-1"; 
+                 
+                 // 🚀 FIX: Agar app pehle se open thi (background se aayi), toh form delete mat karo!
+                 if (document.getElementById("dashboardDiv").style.display !== "flex") {
+                     loadWorkspace(); 
+                 }
+             } 
              else { document.getElementById("pinErrMsg").innerText = "Incorrect PIN!"; clearPinInputs(); document.getElementById("pin1").focus(); }
          }, 400);
       }
