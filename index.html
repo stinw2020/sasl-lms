@@ -416,8 +416,17 @@
             <form id="expForm" onsubmit="return false;">
               <div class="form-grid">
                 <div class="input-group"><label>Date</label><input type="date" id="expDate"></div>
-                <div class="input-group"><label>Category</label><select id="expCat"><option>Rent</option><option>Electricity</option><option>Internet</option><option>Salary</option><option>Others</option></select></div>
-                <div class="input-group"><label>Amt</label><input type="number" id="expAmt"></div>
+<div class="input-group">
+    <label>Category</label>
+    <select id="expCat">
+        <option value="">-- Select Category --</option>
+        <option>Rent</option>
+        <option>Electricity</option>
+        <option>Internet</option>
+        <option>Salary</option>
+        <option>Others</option>
+    </select>
+</div>                <div class="input-group"><label>Amt</label><input type="number" id="expAmt"></div>
                 <div class="input-group"><label>Desc</label><input type="text" id="expDesc"></div>
                 <div class="input-group full-width"><button type="button" onclick="submitExpense()" id="expBtn" class="btn-red">Record</button><div id="expMessage"></div></div>
               </div>
@@ -870,15 +879,76 @@
 
       function changeMapShift(shiftName, btnElement) { document.querySelectorAll('.shift-tab').forEach(el=>el.classList.remove('active')); btnElement.classList.add('active'); document.getElementById("currentMapShift").value=shiftName; loadSeatMap(shiftName); }
       function refreshCurrentMap() { loadSeatMap(document.getElementById("currentMapShift").value); }
-      function loadSeatMap(shiftName) { if(!shiftName) shiftName="Morning"; document.getElementById("seatMapContainer").innerHTML="<h2>Loading Map...</h2>"; callBackend("getSeatData", {shiftName:shiftName}, res=>{ if(res.success){let html=""; res.data.forEach(s=>{let cls=s.status=="Available"?"bg-avail":(s.status=="Occupied"?"bg-occ":"bg-blk"), stIdHtml=s.studentId?`<div class='seat-id-badge'>${s.studentId}</div>`:""; html+=`<div class='seat-card ${cls}' onclick="openSeatModal('${s.seatNo}','${s.status}','${s.studentId}')">${stIdHtml}<div style='font-size:18px;'>${s.seatNo}</div></div>`;}); document.getElementById("seatMapContainer").innerHTML=html===""?"<h3 style='color:#e74c3c;'>No Seats.</h3>":html;} }); }
+function loadSeatMap(shiftName) { 
+          if(!shiftName) shiftName="Morning"; 
+          document.getElementById("seatMapContainer").innerHTML="<h2>Loading Map...</h2>"; 
+          
+          callBackend("getSeatData", {shiftName:shiftName}, res=>{ 
+              if(res.success){
+                  let html=""; 
+                  res.data.forEach(s=>{
+                      let cls = "bg-avail"; // Default Available
+                      
+                      if(s.status === "Blocked") {
+                          cls = "bg-blk";
+                      } else if(s.status === "Occupied") {
+                          // 🚀 FIX: Seat tabhi Occupied (Red) dikhe jab student ki shift current map shift se match kare 
+                          // YA student ki shift 'Full Day' ho.
+                          if(s.studentShift === shiftName || s.studentShift === "Full Day" || shiftName === "Full Day") {
+                              cls = "bg-occ";
+                          } else {
+                              cls = "bg-avail"; // Agar dusri shift ka student hai toh is shift me seat khaali dikhegi
+                          }
+                      }
+                      
+                      let stIdHtml = (cls === "bg-occ" && s.studentId) ? `<div class='seat-id-badge'>${s.studentId}</div>` : ""; 
+                      let clickStatus = cls === "bg-occ" ? "Occupied" : s.status; // Modal accurate open karne ke liye
+                      
+                      html+=`<div class='seat-card ${cls}' onclick="openSeatModal('${s.seatNo}','${clickStatus}','${s.studentId || ''}')">${stIdHtml}<div style='font-size:18px;'>${s.seatNo}</div></div>`;
+                  }); 
+                  document.getElementById("seatMapContainer").innerHTML=html===""?"<h3 style='color:#e74c3c;'>No Seats.</h3>":html;
+              } 
+          }); 
+      }     
       function openSeatModal(seatNo, status, studentId) { document.getElementById("seatActionModal").style.display="flex"; document.getElementById("smSeatNo").value=seatNo; document.getElementById("smTitle").innerText="Action for "+seatNo; document.getElementById("smMessage").innerHTML=""; let ad=document.getElementById("smAction"); ad.innerHTML=""; if(status==="Available"){document.getElementById("smStatusText").innerText="Available"; ad.innerHTML+="<option value='Assign'>Assign to Student</option><option value='Block'>Block Seat</option>";} else if(status==="Occupied"){document.getElementById("smStatusText").innerText="Occupied by: "+studentId; ad.innerHTML+="<option value='Vacate'>Vacate Seat</option>";} else if(status==="Blocked"){document.getElementById("smStatusText").innerText="Blocked"; ad.innerHTML+="<option value='Unblock'>Unblock Seat</option>";} toggleSeatInput(); }
       function toggleSeatInput() { document.getElementById("smStudentIdDiv").style.display = document.getElementById("smAction").value==="Assign"?"block":"none"; if(document.getElementById("smAction").value==="Assign") document.getElementById("smStudentId").value=""; }
       function closeSeatModal() { document.getElementById("seatActionModal").style.display="none"; }
       function saveSeatAction() { let sNo=document.getElementById("smSeatNo").value, act=document.getElementById("smAction").value, sId=document.getElementById("smStudentId").value.trim(), sShift=document.getElementById("currentMapShift").value; if(act==="Assign"&&sId==="") return document.getElementById("smMessage").innerHTML="<span class='error'>Enter ID!</span>"; document.getElementById("smSaveBtn").innerHTML="Updating..."; callBackend("updateSeatAction", {seatNo:sNo, action:act, studentId:sId, selectedShift:sShift}, res=>{document.getElementById("smSaveBtn").innerHTML="Update Seat"; if(res.success){closeSeatModal();refreshCurrentMap();} else document.getElementById("smMessage").innerHTML=`<span class='error'>${res.message}</span>`;}); }
 
-      function submitExpense() { let d={date:document.getElementById("expDate").value, category:document.getElementById("expCat").value, amount:document.getElementById("expAmt").value, description:document.getElementById("expDesc").value, role:currentUserRole}; if(!d.date||!d.amount) return document.getElementById("expMessage").innerHTML="<span class='error'>Fill Date & Amt!</span>"; document.getElementById("expBtn").innerHTML="Saving..."; callBackend("addExpense", d, res=>{document.getElementById("expBtn").innerHTML="Record Expense"; if(res.success){document.getElementById("expMessage").innerHTML=`<span class='success'>${res.message}</span>`; document.getElementById("expForm").reset(); loadExpenses();}}); }
-      function loadExpenses() { callBackend("getExpenseData", {fromDate:document.getElementById("filterExpFrom").value, toDate:document.getElementById("filterExpTo").value}, list=>{ let tb=document.getElementById("expenseBody"); tb.innerHTML=""; list.forEach((e,i)=>{tb.innerHTML+=`<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${currentUserRole==='Admin'?`<button onclick='deleteExpense(${i})' class='btn-red' style='padding:2px 8px;'>Del</button>`:''}</td></tr>`;}); }); }
-      function deleteExpense(index) { if(confirm("Sure?")) callBackend("deleteExpense", {index:index}, r=>loadExpenses()); }
+function submitExpense() { 
+          let d={
+              date:document.getElementById("expDate").value, 
+              category:document.getElementById("expCat").value, 
+              amount:document.getElementById("expAmt").value, 
+              description:document.getElementById("expDesc").value, 
+              role:currentUserRole
+          }; 
+          
+          let msg = document.getElementById("expMessage");
+          
+          if(!d.date || !d.amount) return msg.innerHTML="<span class='error'>Fill Date & Amt!</span>"; 
+          if(d.category === "") return msg.innerHTML="<span class='error'>Please Select Category!</span>"; // 🚀 FIX: Validation Check
+          
+          document.getElementById("expBtn").innerHTML="Saving..."; 
+          callBackend("addExpense", d, res=>{
+              document.getElementById("expBtn").innerHTML="Record Expense"; 
+              if(res.success){
+                  msg.innerHTML=`<span class='success'>${res.message}</span>`; 
+                  document.getElementById("expForm").reset(); 
+                  loadExpenses();
+              }
+          }); 
+      }
+function loadExpenses() { 
+          callBackend("getExpenseData", {fromDate:document.getElementById("filterExpFrom").value, toDate:document.getElementById("filterExpTo").value}, list=>{ 
+              let tb=document.getElementById("expenseBody"); 
+              tb.innerHTML=""; 
+              list.forEach((e)=>{
+                  // 🚀 FIX: Index ki jagah backend se aa rahe asli s.rowIndex ya e.rowIndex ko use karenge
+                  tb.innerHTML+=`<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${currentUserRole==='Admin'?`<button onclick='deleteExpense(${e.rowIndex})' class='btn-red' style='padding:2px 8px;'>Del</button>`:''}</td></tr>`;
+              }); 
+          }); 
+      }      function deleteExpense(index) { if(confirm("Sure?")) callBackend("deleteExpense", {index:index}, r=>loadExpenses()); }
       function loadPendingFees() { let tb=document.getElementById("pendingBody"); tb.innerHTML="<tr><td colspan='7'>Loading...</td></tr>"; callBackend("getPendingFees", {}, list=>{ tb.innerHTML=""; if(!list||list.length===0) return tb.innerHTML="<tr><td colspan='7'>No pending fees.</td></tr>"; let tDay=new Date(); tDay.setHours(0,0,0,0); list.forEach(s=>{s.diffDays=0; if(s.dueDate){let dp=s.dueDate.split("/"); if(dp.length===3){let due=new Date(dp[2],dp[1]-1,dp[0]); due.setHours(0,0,0,0); s.diffDays=Math.floor((tDay.getTime()-due.getTime())/(1000*60*60*24));}} }); list.sort((a,b)=>b.diffDays-a.diffDays); list.forEach(s=>{ tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mobile}</td><td><b style='color:red;'>${s.dueDate}</b></td><td><b style='color:#e67e22;'>${s.diffDays} Days</b></td><td>₹${s.amount}</td><td><a href='https://wa.me/91${s.mobile}?text=${encodeURIComponent(`*${currentConfig?currentConfig.name:"Library"}*\n\nDear ${s.name},\nYour fee is pending since ${s.dueDate} (${s.diffDays} days ago). Please submit your fee.\n\nThank you!`)}' target='_blank' class='btn-green' style='padding:5px 10px; text-decoration:none;'>WhatsApp</a></td></tr>`; }); }); }
       function loadNoticeBoard() { let fs=document.getElementById("noticeShiftFilter").value, ft=document.getElementById("noticeStatusFilter").value, tb=document.getElementById("noticeBody"); tb.innerHTML="<tr><td colspan='5'>Loading...</td></tr>"; callBackend("getStudentDetails", {}, list=>{tb.innerHTML=""; let c=0; list.forEach(s=>{if((ft==="All"||s.status===ft)&&(fs==="All"||s.shift===fs)){tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.shift}</td><td style='color:${s.status==="Active"?"green":"red"};font-weight:bold;'>${s.status}</td><td><button class='btn-green' style='padding:5px 10px;' onclick="sendNotice('${s.mobile}','${s.name}')">Message</button></td></tr>`; c++;}}); if(c===0) tb.innerHTML="<tr><td colspan='5' style='color:red;'>No students.</td></tr>";}); }
       function sendNotice(mob, name) { let cm=document.getElementById("customNoticeMsg").value.trim(), l=currentConfig?currentConfig.name:"Library", t=cm!==""?cm:"Please check the notice board for updates.", msg=`*${l} - Notice*\n\nDear ${name},\n${t}\n\nThank you!`; window.open("https://wa.me/91"+mob+"?text="+encodeURIComponent(msg), "_blank"); }
