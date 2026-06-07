@@ -589,14 +589,49 @@
         }, err => { document.getElementById("loginBtn").innerHTML = "Secure Login"; document.getElementById("message").innerHTML = "<span class='error'>Network Error</span>"; });
       }
 
-      function showForgotPassword() { document.getElementById("loginBox").style.display="none"; document.getElementById("forgotBox").style.display="block"; document.getElementById("fpStep1").style.display="block"; document.getElementById("fpStep2").style.display="none"; document.getElementById("fpStep3").style.display="none"; document.getElementById("fpMessage").innerHTML=""; }
-      function sendForgotOTP() {
-         let u = document.getElementById("fpUserId").value.trim(); if(!u) return; document.getElementById("fpSendBtn").innerHTML="Sending...";
-         callBackend("forgotPasswordOTP", {userId: u}, res => {
-            document.getElementById("fpSendBtn").innerHTML="Send OTP to Email";
-            if(res.success) { document.getElementById("fpStep1").style.display="none"; document.getElementById("fpStep2").style.display="block"; document.getElementById("fpMessage").innerHTML=`<span class='success'>${res.message}</span>`; }
-            else document.getElementById("fpMessage").innerHTML=`<span class='error'>${res.message}</span>`;
-         });
+     function executeLoginFlow() {
+        let role = document.getElementById("loginRole").value;
+        let userId = document.getElementById("loginUserId").value.trim();
+        let pass = document.getElementById("loginPassword").value.trim();
+        let btn = document.getElementById("loginBtn");
+        let msg = document.getElementById("message");
+        
+        if(!userId || !pass) {
+            msg.innerHTML = "<span class='error'>User ID aur Password daalein!</span>";
+            return;
+        }
+        
+        btn.innerHTML = "Verifying...";
+        btn.disabled = true;
+        msg.innerHTML = "";
+        
+        callBackend("verifyLogin", {role: role, userId: userId, password: pass}, function(res) {
+            btn.innerHTML = "Secure Login";
+            btn.disabled = false;
+            
+            if(res.success) { 
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("userRole", res.role);
+                localStorage.setItem("userName", res.name);
+                localStorage.setItem("userId", res.userId);
+                localStorage.setItem("libRole", res.role); // Role backup
+                
+                // PIN check
+                if(!localStorage.getItem("appPin")) {
+                    let np = prompt("Set a 4-Digit Security PIN:");
+                    if(np && np.length === 4 && !isNaN(np)) localStorage.setItem("appPin", np);
+                    else localStorage.setItem("appPin", "0000");
+                }
+                document.getElementById("loginWrapper").style.display = "none";
+                loadWorkspace();
+            } else {
+                msg.innerHTML = `<span class='error'>${res.message}</span>`;
+            }
+        }, function(err) {
+            btn.innerHTML = "Secure Login";
+            btn.disabled = false;
+            msg.innerHTML = "<span class='error'>Network Error! Check connection.</span>";
+        });
       }
       function verifyForgotOTP() {
          let u = document.getElementById("fpUserId").value.trim(), otp = document.getElementById("fpOtp").value.trim(); if(otp.length!==6) return; document.getElementById("fpVerifyBtn").innerHTML="Verifying...";
