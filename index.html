@@ -511,8 +511,21 @@
          } else showLoginScreen();
       };
 
+      // 🚀 FIX: Camera khulne par App ko batana ki PIN nahi maangna hai
+      let isCameraOpen = false;
+      document.addEventListener('click', function(e) {
+          if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'file') {
+              isCameraOpen = true;
+              setTimeout(() => { isCameraOpen = false; }, 60000); // 1 minute auto-reset
+          }
+      });
+
       document.addEventListener("visibilitychange", () => {
          if(document.visibilityState === "visible" && localStorage.getItem("isLoggedIn") === "true") {
+             if (isCameraOpen) {
+                 isCameraOpen = false; // Camera se aaye hain, PIN mat maango
+                 return;
+             }
              if (!navigator.onLine) { document.getElementById('offlineScreen').style.display = 'flex'; } else { showPinScreen(); }
          } else { lastActivityTime = Date.now(); }
       });
