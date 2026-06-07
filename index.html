@@ -22,7 +22,9 @@
       * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
       body { background-color: #f4f7fc; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
       
-#pinScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f131c; color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }      .pin-header h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; letter-spacing: 0.5px; }
+      /* FIX: Removed !important from display to prevent blank screen issue */
+      #pinScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f131c; color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
+      .pin-header h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; letter-spacing: 0.5px; }
       .pin-header p { margin: 0 0 30px 0; color: #7f8c8d; font-size: 14px; }
       .pin-container { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
       .pin-box { width: 55px; height: 55px; font-size: 28px; text-align: center; border: 2px solid #34495e; background: #1a252f; color: white; border-radius: 10px; outline: none; transition: 0.2s; font-weight: bold; }
@@ -297,7 +299,7 @@
                 <div class="input-group"><label>Fee Plan</label><select id="feePlan" onchange="calculateFee()"><option>Monthly</option><option>Quarterly</option><option>Half Yearly</option><option>Yearly</option><option>Demo</option></select></div>
                 <div class="input-group"><label>Discount (₹)</label><input type="number" id="discount" value="0" oninput="calculateFee()"></div>
                 <div class="input-group"><label>Base Fee *</label><input type="number" id="feeAmt" readonly></div>
-                <div class="input-group full-width"><button onclick="submitStudent()" id="submitStdBtn">Register Student & Generate ID</button><div id="stdMessage"></div></div>
+                <div class="input-group full-width"><button type="button" onclick="submitStudent()" id="submitStdBtn">Register Student & Generate ID</button><div id="stdMessage"></div></div>
               </div>
             </form>
           </div>
@@ -338,7 +340,7 @@
                 <div class="input-group"><label>Fee Plan</label><select id="upd_feePlan" onchange="calculateUpdFee()"><option>Monthly</option><option>Quarterly</option><option>Half Yearly</option><option>Yearly</option><option>Demo</option></select></div>
                 <div class="input-group"><label>Discount</label><input type="number" id="upd_discount" oninput="calculateUpdFee()"></div>
                 <div class="input-group"><label>Base Fee</label><input type="number" id="upd_base" readonly></div>
-                <div class="input-group full-width" style="display:flex; gap:10px;"><button onclick="saveStudentUpdate()" id="updSaveBtn" class="btn-green">Save Updates</button><button onclick="showSection('sec-studentList', 'nav-studentList')" class="btn-red">Cancel</button></div>
+                <div class="input-group full-width" style="display:flex; gap:10px;"><button type="button" onclick="saveStudentUpdate()" id="updSaveBtn" class="btn-green">Save Updates</button><button type="button" onclick="showSection('sec-studentList', 'nav-studentList')" class="btn-red">Cancel</button></div>
               </div>
             </form>
           </div>
@@ -363,7 +365,7 @@
                 <div class="input-group"><label>Fee Plan</label><select id="rej_feePlan" onchange="calculateRejFee()"><option>Monthly</option><option>Quarterly</option><option>Half Yearly</option><option>Yearly</option><option>Demo</option></select></div>
                 <div class="input-group"><label>Discount</label><input type="number" id="rej_discount" oninput="calculateRejFee()"></div>
                 <div class="input-group"><label>Base Fee</label><input type="number" id="rej_base" readonly></div>
-                <div class="input-group full-width" style="display:flex; gap:10px;"><button onclick="saveRejoinStudent()" id="rejSaveBtn" style="background:#8e44ad;">Rejoin</button><button onclick="showSection('sec-studentList', 'nav-studentList')" class="btn-red">Cancel</button></div>
+                <div class="input-group full-width" style="display:flex; gap:10px;"><button type="button" onclick="saveRejoinStudent()" id="rejSaveBtn" style="background:#8e44ad;">Rejoin</button><button type="button" onclick="showSection('sec-studentList', 'nav-studentList')" class="btn-red">Cancel</button></div>
               </div>
             </form>
           </div>
@@ -400,7 +402,7 @@
                 <div class="input-group"><label>Reg Fee</label><input type="number" id="f_regFee" value="0" oninput="calcTotalFee()"></div>
                 <div class="input-group"><label>Discount</label><input type="number" id="f_discount" value="0" oninput="calcTotalFee()"></div>
                 <div class="input-group"><label>Total Paid</label><input type="number" id="f_totalPaid" readonly style="background:#d4edda; color:#155724; font-size:20px;"></div>
-                <div class="input-group full-width"><button onclick="submitFee()" id="submitFeeBtn" class="btn-green">Collect Fee</button></div>
+                <div class="input-group full-width"><button type="button" onclick="submitFee()" id="submitFeeBtn" class="btn-green">Collect Fee</button></div>
               </div>
             </form>
           </div>
@@ -417,7 +419,7 @@
                 <div class="input-group"><label>Category</label><select id="expCat"><option>Rent</option><option>Electricity</option><option>Internet</option><option>Salary</option><option>Others</option></select></div>
                 <div class="input-group"><label>Amt</label><input type="number" id="expAmt"></div>
                 <div class="input-group"><label>Desc</label><input type="text" id="expDesc"></div>
-                <div class="input-group full-width"><button onclick="submitExpense()" id="expBtn" class="btn-red">Record</button><div id="expMessage"></div></div>
+                <div class="input-group full-width"><button type="button" onclick="submitExpense()" id="expBtn" class="btn-red">Record</button><div id="expMessage"></div></div>
               </div>
             </form>
           </div>
@@ -430,21 +432,20 @@
         
         <div id="sec-feeList" class="section-view"><div class="header"><h1>All Fees Records</h1><button onclick="loadAllFees();" class="btn-blue" style="width:150px;">🔄 Refresh</button></div><div class="filter-box"><div class="input-group"><label>From</label><input type="date" id="flFrom"></div><div class="input-group"><label>To</label><input type="date" id="flTo"></div><div class="input-group"><label>Mode</label><select id="flMode" onchange="filterFeeList()"><option value="All">All</option><option value="Cash">Cash</option><option value="UPI">UPI</option><option value="Both">Both</option></select></div><div class="input-group"><label>Search</label><input type="text" id="flSearch" onkeyup="filterFeeList()"></div><button onclick="filterFeeList()" class="btn-blue" style="width:120px;">Filter</button></div><div id="adminTotalFeeDiv" style="background:#2ecc71; color:white; padding:10px 20px; border-radius:8px; margin-bottom:15px; font-weight:bold; display:none;">Total: ₹<span id="totalFeeAmount">0</span></div><div style="background:white; padding:15px; border-radius:8px; overflow-x:auto;"><table id="allFeeTable"><thead><tr><th>Receipt</th><th>ID</th><th>Name</th><th>Date</th><th>Mode</th><th>Total Paid</th><th>By</th><th>Action</th></tr></thead><tbody id="allFeeBody"></tbody></table></div></div>
         
-        <div id="sec-config" class="section-view admin-only"><div class="header"><h1>Configuration</h1></div><div class="form-container"><h3 style="color:#e67e22;">1. General Details</h3><div class="form-grid"><div class="input-group"><label>Name</label><input type="text" id="confName"></div><div class="input-group"><label>Mobile</label><input type="text" id="confMobile"></div><div class="input-group full-width"><label>Address</label><input type="text" id="confAddress"></div><div class="input-group"><label>Email</label><input type="text" id="confEmail"></div><div class="input-group"><label>Upload Logo</label><input type="file" id="confLogo"></div><input type="hidden" id="confOldLogo"><div class="input-group full-width"><button onclick="saveLibGeneral()" id="btnGen" class="btn-green">Save</button><div id="msgGen"></div></div></div></div><div class="form-container"><h3 style="color:#e67e22;">2. Seat Settings</h3><div class="form-grid"><div class="input-group"><label>Format</label><select id="confSeatType" onchange="togglePrefixBox()"><option value="Numeric">Numeric</option><option value="Alpha-Numeric">Alpha-Numeric</option></select></div><div id="confPrefixDiv" style="display:none; grid-column:span 2;"><table style="width:100%;"><thead><tr><th>Prefix</th><th>Seats</th><th>Action</th></tr></thead><tbody id="configPrefixBody"></tbody></table><button type="button" class="btn-green" style="width:auto; margin-top:10px;" onclick="addConfigPrefixRow('','')">+ Prefix</button></div><div class="input-group full-width" id="confNumericDiv"><label>Total Seats</label><input type="number" id="confTotalSeats"></div><div class="input-group full-width"><button id="btnSeat" type="button" class="btn-blue" onclick="saveLibSeats()">Generate Seats</button><div id="msgSeat"></div></div></div></div><div class="form-container"><h3 style="color:#e67e22;">3. Shifts</h3><table style="display:block; overflow-x:auto;"><thead><tr><th>Name</th><th>M</th><th>Q</th><th>H</th><th>Y</th><th>D</th></tr></thead><tbody id="configShiftBody"></tbody></table><button onclick="addConfigShiftRow()" class="btn-orange" style="width:200px; margin-top:15px;">+ Shift</button><div class="input-group full-width" style="margin-top:20px;"><button onclick="saveLibShifts()" id="btnShift" class="btn-green">Save Shifts</button><div id="msgShift"></div></div></div><div class="form-container"><h3 style="color:#e67e22;">4. QR</h3><div class="input-group full-width"><input type="file" id="qrUploadInput" accept="image/*"><button onclick="saveQrCode()" id="qrUploadBtn" class="btn-green" style="margin-top:10px;">Upload</button></div></div></div>
+        <div id="sec-config" class="section-view admin-only"><div class="header"><h1>Configuration</h1></div><div class="form-container"><h3 style="color:#e67e22;">1. General Details</h3><div class="form-grid"><div class="input-group"><label>Name</label><input type="text" id="confName"></div><div class="input-group"><label>Mobile</label><input type="text" id="confMobile"></div><div class="input-group full-width"><label>Address</label><input type="text" id="confAddress"></div><div class="input-group"><label>Email</label><input type="text" id="confEmail"></div><div class="input-group"><label>Upload Logo</label><input type="file" id="confLogo"></div><input type="hidden" id="confOldLogo"><div class="input-group full-width"><button type="button" onclick="saveLibGeneral()" id="btnGen" class="btn-green">Save</button><div id="msgGen"></div></div></div></div><div class="form-container"><h3 style="color:#e67e22;">2. Seat Settings</h3><div class="form-grid"><div class="input-group"><label>Format</label><select id="confSeatType" onchange="togglePrefixBox()"><option value="Numeric">Numeric</option><option value="Alpha-Numeric">Alpha-Numeric</option></select></div><div id="confPrefixDiv" style="display:none; grid-column:span 2;"><table style="width:100%;"><thead><tr><th>Prefix</th><th>Seats</th><th>Action</th></tr></thead><tbody id="configPrefixBody"></tbody></table><button type="button" class="btn-green" style="width:auto; margin-top:10px;" onclick="addConfigPrefixRow('','')">+ Prefix</button></div><div class="input-group full-width" id="confNumericDiv"><label>Total Seats</label><input type="number" id="confTotalSeats"></div><div class="input-group full-width"><button id="btnSeat" type="button" class="btn-blue" onclick="saveLibSeats()">Generate Seats</button><div id="msgSeat"></div></div></div></div><div class="form-container"><h3 style="color:#e67e22;">3. Shifts</h3><table style="display:block; overflow-x:auto;"><thead><tr><th>Name</th><th>M</th><th>Q</th><th>H</th><th>Y</th><th>D</th></tr></thead><tbody id="configShiftBody"></tbody></table><button type="button" onclick="addConfigShiftRow()" class="btn-orange" style="width:200px; margin-top:15px;">+ Shift</button><div class="input-group full-width" style="margin-top:20px;"><button type="button" onclick="saveLibShifts()" id="btnShift" class="btn-green">Save Shifts</button><div id="msgShift"></div></div></div><div class="form-container"><h3 style="color:#e67e22;">4. QR</h3><div class="input-group full-width"><input type="file" id="qrUploadInput" accept="image/*"><button type="button" onclick="saveQrCode()" id="qrUploadBtn" class="btn-green" style="margin-top:10px;">Upload</button></div></div></div>
 
     <div id="seatActionModal" class="modal-overlay"><div class="modal-box"><h3 id="smTitle">Seat Action</h3><p id="smStatusText" style="color:#555; margin-bottom:15px; font-weight:bold;"></p><input type="hidden" id="smSeatNo"><div class="input-group" id="smActionSelectDiv"><label>Action</label><select id="smAction" onchange="toggleSeatInput()"></select></div><div class="input-group" id="smStudentIdDiv" style="display:none;"><label>Student ID</label><input type="text" id="smStudentId"></div><div style="display:flex; gap:10px;"><button onclick="saveSeatAction()" id="smSaveBtn" class="btn-green">Update Seat</button><button onclick="closeSeatModal()" class="btn-red">Cancel</button></div><div id="smMessage"></div></div></div>
     <div id="qrModal" class="modal-overlay"><div class="modal-box" style="text-align:center; max-width:320px;"><h3 style="margin-top:0;">Scan to Pay</h3><img id="popupQrImage" src="" style="width:100%; max-width:220px; border:2px solid #ddd; padding:5px; border-radius:8px;"><p style="font-size:13px; color:#e74c3c; font-weight:bold;">Pay first, then close.</p><button onclick="document.getElementById('qrModal').style.display='none'" class="btn-red">Close QR</button></div></div>
     
-    <div id="receiptModal" class="modal-overlay"><div class="receipt-box" id="receiptContent"><input type="hidden" id="r_mobile"><h2 style="margin-top:0; border-bottom:1px dashed #333; padding-bottom:10px; text-align:center;">FEE RECEIPT</h2><div class="receipt-row"><span>Receipt No:</span><strong id="r_no"></strong></div><div class="receipt-row"><span>Date:</span><strong id="r_date"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>ID:</span><strong id="r_id"></strong></div><div class="receipt-row"><span>Name:</span><strong id="r_name"></strong></div><div class="receipt-row"><span>Period:</span><strong id="r_month"></strong></div><div class="receipt-row"><span>Mode:</span><strong id="r_mode"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Base:</span><strong id="r_base"></strong></div><div class="receipt-row"><span>Reg. Fee:</span><strong id="r_regFee"></strong></div><div class="receipt-row"><span>Disc:</span><strong id="r_disc"></strong></div><div style="border-bottom:2px solid #333; margin:10px 0;"></div><div class="receipt-row" style="font-size:18px; font-weight:bold;"><span>Total Paid:</span><strong id="r_total"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Next Due:</span><strong id="r_nextDue"></strong></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG('receiptContent', 'Fee_Receipt.jpg')" style="margin-top:15px;">Download / Print Receipt</button><button class="print-btn btn-green" onclick="sendWhatsappReceipt()" style="margin-top:10px;">WhatsApp Receipt</button><button class="print-btn btn-red" onclick="document.getElementById('receiptModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
+    <div id="receiptModal" class="modal-overlay"><div class="receipt-box" id="receiptContent"><input type="hidden" id="r_mobile"><h2 style="margin-top:0; border-bottom:1px dashed #333; padding-bottom:10px; text-align:center;">FEE RECEIPT</h2><div class="receipt-row"><span>Receipt No:</span><strong id="r_no"></strong></div><div class="receipt-row"><span>Date:</span><strong id="r_date"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>ID:</span><strong id="r_id"></strong></div><div class="receipt-row"><span>Name:</span><strong id="r_name"></strong></div><div class="receipt-row"><span>Period:</span><strong id="r_month"></strong></div><div class="receipt-row"><span>Mode:</span><strong id="r_mode"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Base:</span><strong id="r_base"></strong></div><div class="receipt-row"><span>Reg. Fee:</span><strong id="r_regFee"></strong></div><div class="receipt-row"><span>Disc:</span><strong id="r_disc"></strong></div><div style="border-bottom:2px solid #333; margin:10px 0;"></div><div class="receipt-row" style="font-size:18px; font-weight:bold;"><span>Total Paid:</span><strong id="r_total"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Next Due:</span><strong id="r_nextDue"></strong></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'receiptContent', 'Fee_Receipt.jpg')" style="margin-top:15px;">Download / Print Receipt</button><button class="print-btn btn-green" onclick="sendWhatsappReceipt()" style="margin-top:10px;">WhatsApp Receipt</button><button class="print-btn btn-red" onclick="document.getElementById('receiptModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
     
-    <div id="idCardModal" class="modal-overlay"><div class="id-card-box" id="idCardContent"><div class="id-card-header"><h2 id="idc_libName">LIBRARY</h2><p id="idc_libAddress">Address</p><p id="idc_libContact">Contact</p></div><img id="idc_photo" class="id-card-photo" src=""><div class="id-card-details"><div><strong>Name:</strong> <span id="idc_name"></span></div><div><strong>ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div><div><strong>Guardian:</strong> <span id="idc_fname"></span></div><div><strong>Mobile:</strong> <span id="idc_mobile"></span></div><div><strong>Join:</strong> <span id="idc_join"></span></div></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG('idCardContent', 'Student_ID_Card.jpg')" style="margin-top:20px;">Download / Print ID</button><button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button><button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
+    <div id="idCardModal" class="modal-overlay"><div class="id-card-box" id="idCardContent"><div class="id-card-header"><h2 id="idc_libName">LIBRARY</h2><p id="idc_libAddress">Address</p><p id="idc_libContact">Contact</p></div><img id="idc_photo" class="id-card-photo" src=""><div class="id-card-details"><div><strong>Name:</strong> <span id="idc_name"></span></div><div><strong>ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div><div><strong>Guardian:</strong> <span id="idc_fname"></span></div><div><strong>Mobile:</strong> <span id="idc_mobile"></span></div><div><strong>Join:</strong> <span id="idc_join"></span></div></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'idCardContent', 'Student_ID_Card.jpg')" style="margin-top:20px;">Download / Print ID</button><button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button><button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
 
     <script>
       // ==========================================
       // 🚀 NAYA FUNCTION: DOWNLOAD AS IMAGE FIX
       // ==========================================
-      function downloadImageAsJPEG(divId, fileName) {
-          let btn = event.target;
+      function downloadImageAsJPEG(btn, divId, fileName) {
           let oldText = btn.innerText;
           btn.innerText = "⏳ Processing...";
           
@@ -515,18 +516,22 @@
              if (!navigator.onLine) { document.getElementById('offlineScreen').style.display = 'flex'; } else { showPinScreen(); }
          } else { lastActivityTime = Date.now(); }
       });
+      
       function checkInactivity() { if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= 1800000) { alert("30 minute tak koi activity na hone ke karan aap auto-logout ho gaye hain. Kripya dobara login karein."); executeSystemLogout(); } }
 
-      // 🚀 FIX: PIN LOGIC BACKSPACE JUMP FIX
+      // 🚀 FIX: PIN LOGIC BACKSPACE JUMP FIX & DISPLAY ISSUE
       function showPinScreen() { 
           document.getElementById("loginWrapper").style.display = "none"; 
           document.getElementById("dashboardDiv").style.display = "none"; 
           let ps = document.getElementById("pinScreen");
           ps.style.display = "flex"; 
-          ps.style.zIndex = "999999"; // Reset z-index
+          ps.style.zIndex = "999999";
           clearPinInputs(); 
           document.getElementById("pin1").focus(); 
       }
+      function showLoginScreen() { document.getElementById("pinScreen").style.display = "none"; document.getElementById("dashboardDiv").style.display = "none"; document.getElementById("loginWrapper").style.display = "flex"; showLoginPanel(); }
+      
+      function movePinFocus(curr, nextID) { 
           if(curr.value.length === 1) { 
               if(nextID === 'verify') processPinVerification(); 
               else document.getElementById(nextID).focus(); 
@@ -641,7 +646,7 @@
          document.getElementById("staffAddBtn").innerHTML="Adding...";
          callBackend("addStaff", {name: n, mobile: m, email: e}, res => {
             document.getElementById("staffAddBtn").innerHTML="Add Staff & Send Email";
-            if(res.success) { document.getElementById("staffMessage").innerHTML=`<span class='success'>${res.message}</span>`; ["staffName","staffMobile","staffEmail"].forEach(id=>document.getElementById(id).value=""); loadStaffList(); }
+            if(res.success) { document.getElementById("staffMessage").innerHTML=`<span class='success'>${res.message}</span>`; document.getElementById("staffName").value=""; document.getElementById("staffMobile").value=""; document.getElementById("staffEmail").value=""; loadStaffList(); }
             else document.getElementById("staffMessage").innerHTML=`<span class='error'>${res.message}</span>`;
          });
       }
@@ -698,25 +703,40 @@
       function toggleStatus(row, nStatus) { callBackend("toggleStudentStatus", {rowIndex:row, status:nStatus}, r=>{loadStudentDetails(); loadDashboardData();}); }
       function deleteStudentBtn(row, id) { if(confirm("Delete "+id+"?")) callBackend("deleteStudent", {rowIndex:row, id:id}, r=>{loadStudentDetails(); loadDashboardData();}); }
 
+      // 🚀 FIX: Puraana Data Saaf hone ke BAAD Data Bharo
       function openUpdateModal(rIdx) { 
-          showSection('sec-update-student', 'nav-studentList'); // 🚀 FIX: Pehle form kholo aur purana data saaf hone do
+          showSection('sec-update-student', 'nav-studentList'); 
           let st=globalStudents.find(s=>s.rowIndex==rIdx); 
           if(!st) return; 
-          
-          // 🚀 FIX: Ab form mein naya data dalo
           ["id","name","fname","aadhaar","join","due","mobile","altMobile","address","course","seat","shift","feePlan","discount","base"].forEach(k=>{
               let el=document.getElementById("upd_"+k); 
               if(el) el.value=st[k=="join"?"joinDate":k=="due"?"dueDate":k=="base"?"baseFee":k]||"";
           }); 
           document.getElementById("upd_rowIndex").value=st.rowIndex; 
       }
-
+      
+      function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
+      
+      // 🚀 FIX: FULL DATA PASSED TO ID CARD ON UPDATE
+      function saveStudentUpdate() { 
+          let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
+          if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          let btn = document.getElementById("updSaveBtn"); btn.innerHTML="Saving..."; 
+          callBackend("updateStudentData", d, r=>{
+              btn.innerHTML="Save Updates"; 
+              let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
+              let fullData = {studentName:document.getElementById("upd_name").value, fatherName:document.getElementById("upd_fname").value, mobile:d.mobile, joinDate:document.getElementById("upd_join").value};
+              showSection('sec-studentList', 'nav-studentList'); 
+              showIdCard(document.getElementById("upd_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
+              loadStudentDetails();
+          }); 
+      }
+      
+      // 🚀 FIX: Puraana Data Saaf hone ke BAAD Data Bharo
       function openRejoinModal(rIdx) { 
-          showSection('sec-rejoin-student', 'nav-studentList'); // 🚀 FIX: Pehle form kholo
+          showSection('sec-rejoin-student', 'nav-studentList'); 
           let st=globalStudents.find(s=>s.rowIndex==rIdx); 
           if(!st) return; 
-          
-          // 🚀 FIX: Ab form mein naya data dalo
           ["id","name","fname","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k=>{
               let el=document.getElementById("rej_"+k); 
               if(el) el.value=st[k]||"";
@@ -726,21 +746,7 @@
           document.getElementById("rej_seat").value=""; 
           calculateRejFee(); 
       }
-      // 🚀 FIX: FULL DATA PASSED TO ID CARD ON UPDATE
-      function saveStudentUpdate() { 
-          let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
-          if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
-          let btn = document.getElementById("updSaveBtn"); btn.innerHTML="Saving..."; 
-          callBackend("updateStudentData", d, r=>{
-              btn.innerHTML="Save Updates"; showSection('sec-studentList', 'nav-studentList'); 
-              let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              let fullData = {studentName:document.getElementById("upd_name").value, fatherName:document.getElementById("upd_fname").value, mobile:d.mobile, joinDate:document.getElementById("upd_join").value};
-              showIdCard(document.getElementById("upd_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
-              loadStudentDetails();
-          }); 
-      }
-      
-      function openRejoinModal(rIdx) { let st=globalStudents.find(s=>s.rowIndex==rIdx); if(!st) return; ["id","name","fname","mobile","altMobile","address","course","shift","feePlan","discount"].forEach(k=>{let el=document.getElementById("rej_"+k); if(el) el.value=st[k]||""}); document.getElementById("rej_rowIndex").value=st.rowIndex; document.getElementById("rej_due").value=new Date(Date.now()-(new Date().getTimezoneOffset()*60000)).toISOString().split('T')[0]; document.getElementById("rej_seat").value=""; calculateRejFee(); showSection('sec-rejoin-student', 'nav-studentList'); }
+
       function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
       
       // 🚀 FIX: FULL DATA PASSED TO ID CARD ON REJOIN
@@ -750,9 +756,10 @@
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
           let btn = document.getElementById("rejSaveBtn"); btn.innerHTML="Saving..."; 
           callBackend("rejoinStudent", d, r=>{
-              btn.innerHTML="Rejoin"; showSection('sec-studentList', 'nav-studentList'); 
+              btn.innerHTML="Rejoin";  
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
               let fullData = {studentName:document.getElementById("rej_name").value, fatherName:document.getElementById("rej_fname").value, mobile:d.mobile, joinDate:fDate};
+              showSection('sec-studentList', 'nav-studentList');
               showIdCard(document.getElementById("rej_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Rejoin"); 
               loadStudentDetails(); loadDashboardData();
           }); 
@@ -794,7 +801,7 @@
       function saveLibShifts() { let s=[], rows=document.getElementById("configShiftBody").getElementsByTagName("tr"); for(let i=0;i<rows.length;i++){let n=rows[i].querySelector(".cs-n").value; if(n) s.push({name:n, m:rows[i].querySelector(".cs-m").value, q:rows[i].querySelector(".cs-q").value, h:rows[i].querySelector(".cs-h").value, y:rows[i].querySelector(".cs-y").value, d:rows[i].querySelector(".cs-d").value});} document.getElementById("btnShift").innerHTML="Saving..."; callBackend("updateLibShifts", s, r=>{document.getElementById("btnShift").innerHTML="Save Shifts"; initSystem();}); }
       function saveQrCode() { let fi=document.getElementById("qrUploadInput"); if(fi.files.length===0) return alert("Select QR!"); let btn=document.getElementById("qrUploadBtn"); btn.innerText="Uploading..."; btn.disabled=true; let rd=new FileReader(); rd.onload=e=>{callBackend("uploadQrCode", {base64Data:e.target.result, fileName:fi.files[0].name}, res=>{btn.innerText="Upload"; btn.disabled=false; if(res.success){alert("QR Uploaded!"); globalQrUrl=res.qrUrl;} else alert("Error");});}; rd.readAsDataURL(fi.files[0]); }
 
-      // 🚀 FIX: BASE64 IMAGE LOGIC
+      // 🚀 FIX: BASE64 IMAGE LOGIC FOR ID CARD
       function showIdCard(id, data, libData, pData, actionType) { 
           currentIdCardAction = actionType || "Add"; 
           document.getElementById("idc_libName").innerText = libData.name || "LIBRARY"; 
