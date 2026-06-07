@@ -500,53 +500,6 @@
         </div>
       </div>
     </div>
-        // 🚀 CUSTOM CONFIRMATION LOGIC
-      let confirmActionCallback = null;
-
-      function showCustomConfirm(message, callback) {
-          document.getElementById("confirmMessage").innerText = message;
-          document.getElementById("customConfirmModal").style.display = "flex";
-          confirmActionCallback = callback;
-      }
-
-      function closeConfirmModal() {
-          document.getElementById("customConfirmModal").style.display = "none";
-          confirmActionCallback = null;
-      }
-
-      function executeConfirmAction() {
-          if (confirmActionCallback) confirmActionCallback();
-          closeConfirmModal();
-      }
-
-      // 🚀 UPDATED EXPENSE DELETE (No URL Alert)
-      function deleteExpense(idx, btnElement) { 
-          showCustomConfirm("Kya aap sach me is Expense ko delete karna chahte hain?", function() {
-              let oldText = btnElement.innerText;
-              btnElement.innerText = "⏳..."; 
-              btnElement.disabled = true;
-
-              callBackend("deleteExpense", { index: idx }, function(res) { 
-                  if(res.success) {
-                      loadExpenses(); 
-                  } else {
-                      alert("Delete Error: " + res.message);
-                      btnElement.innerText = oldText; 
-                      btnElement.disabled = false;
-                  }
-              }); 
-          });
-      }
-
-      // 🚀 UPDATED STUDENT DELETE (No URL Alert)
-      function deleteStudentBtn(row, id) { 
-          showCustomConfirm(`Kya aap sach me Student ID: ${id} ko delete karna chahte hain?`, function() {
-              callBackend("deleteStudent", { rowIndex: row, id: id }, function(r) {
-                  loadStudentDetails(); 
-                  loadDashboardData();
-              });
-          });
-      }
     <script>
       // ==========================================
       // 🚀 NAYA FUNCTION: DOWNLOAD AS IMAGE FIX
@@ -1128,6 +1081,53 @@ function submitExpense() {
       document.addEventListener("DOMContentLoaded", function() {
           setTimeout(checkAdminFeeVisibility, 1000);
       });
+      // 🚀 CUSTOM CONFIRMATION LOGIC
+      let confirmActionCallback = null;
+
+      function showCustomConfirm(message, callback) {
+          document.getElementById("confirmMessage").innerText = message;
+          document.getElementById("customConfirmModal").style.display = "flex";
+          confirmActionCallback = callback;
+      }
+
+      function closeConfirmModal() {
+          document.getElementById("customConfirmModal").style.display = "none";
+          confirmActionCallback = null;
+      }
+
+      function executeConfirmAction() {
+          if (confirmActionCallback) confirmActionCallback();
+          closeConfirmModal();
+      }
+
+      // 🚀 UPDATED EXPENSE DELETE (No URL Alert)
+      function deleteExpense(idx, btnElement) { 
+          showCustomConfirm("Kya aap sach me is Expense ko delete karna chahte hain?", function() {
+              let oldText = btnElement.innerText;
+              btnElement.innerText = "⏳..."; 
+              btnElement.disabled = true;
+
+              callBackend("deleteExpense", { index: idx }, function(res) { 
+                  if(res.success) {
+                      loadExpenses(); 
+                  } else {
+                      alert("Delete Error: " + res.message);
+                      btnElement.innerText = oldText; 
+                      btnElement.disabled = false;
+                  }
+              }); 
+          });
+      }
+
+      // 🚀 UPDATED STUDENT DELETE (No URL Alert)
+      function deleteStudentBtn(row, id) { 
+          showCustomConfirm(`Kya aap sach me Student ID: ${id} ko delete karna chahte hain?`, function() {
+              callBackend("deleteStudent", { rowIndex: row, id: id }, function(r) {
+                  loadStudentDetails(); 
+                  loadDashboardData();
+              });
+          });
+      }
     </script>
   </body>
 </html>
