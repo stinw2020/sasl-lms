@@ -22,7 +22,6 @@
       * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
       body { background-color: #f4f7fc; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
       
-      /* FIX: Removed !important from display to prevent blank screen issue */
       #pinScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f131c; color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; padding: 20px; }
       .pin-header h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; letter-spacing: 0.5px; }
       .pin-header p { margin: 0 0 30px 0; color: #7f8c8d; font-size: 14px; }
@@ -448,7 +447,7 @@
     
     <div id="receiptModal" class="modal-overlay"><div class="receipt-box" id="receiptContent"><input type="hidden" id="r_mobile"><h2 style="margin-top:0; border-bottom:1px dashed #333; padding-bottom:10px; text-align:center;">FEE RECEIPT</h2><div class="receipt-row"><span>Receipt No:</span><strong id="r_no"></strong></div><div class="receipt-row"><span>Date:</span><strong id="r_date"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>ID:</span><strong id="r_id"></strong></div><div class="receipt-row"><span>Name:</span><strong id="r_name"></strong></div><div class="receipt-row"><span>Period:</span><strong id="r_month"></strong></div><div class="receipt-row"><span>Mode:</span><strong id="r_mode"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Base:</span><strong id="r_base"></strong></div><div class="receipt-row"><span>Reg. Fee:</span><strong id="r_regFee"></strong></div><div class="receipt-row"><span>Disc:</span><strong id="r_disc"></strong></div><div style="border-bottom:2px solid #333; margin:10px 0;"></div><div class="receipt-row" style="font-size:18px; font-weight:bold;"><span>Total Paid:</span><strong id="r_total"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Next Due:</span><strong id="r_nextDue"></strong></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'receiptContent', 'Fee_Receipt.jpg')" style="margin-top:15px;">Download / Print Receipt</button><button class="print-btn btn-green" onclick="sendWhatsappReceipt()" style="margin-top:10px;">WhatsApp Receipt</button><button class="print-btn btn-red" onclick="document.getElementById('receiptModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
     
-<div id="idCardModal" class="modal-overlay">
+    <div id="idCardModal" class="modal-overlay">
       <div class="id-card-box" id="idCardContent" style="padding:0; overflow:hidden; border-radius:15px; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.3); width:350px; background:#fff;">
         
         <div class="id-card-header" style="background:#fff; padding:20px 20px 5px 20px; text-align:center; margin:0; border-bottom:none;">
@@ -489,6 +488,19 @@
         </div>
       </div>
     </div>
+
+    <div id="customConfirmModal" class="modal-overlay" style="z-index: 1000000;">
+      <div class="modal-box" style="text-align:center; max-width: 320px; padding: 25px; margin: auto;">
+        <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+        <h3 style="margin-top:0; color:#2c3e50; font-size: 20px;">Confirm Action</h3>
+        <p id="confirmMessage" style="color:#555; margin-bottom: 25px; font-size:15px; font-weight: 500;"></p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button id="confirmYesBtn" class="btn-red" style="flex:1;" onclick="executeConfirmAction()">Yes, Delete</button>
+          <button onclick="closeConfirmModal()" class="btn-blue" style="flex:1;">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // ==========================================
       // 🚀 NAYA FUNCTION: DOWNLOAD AS IMAGE FIX
@@ -559,7 +571,6 @@
          } else showLoginScreen();
       };
 
-      // 🚀 FIX: Camera khulne par App ko batana ki PIN nahi maangna hai
       let isCameraOpen = false;
       document.addEventListener('click', function(e) {
           if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'file') {
@@ -580,9 +591,7 @@
       
       function checkInactivity() { if(localStorage.getItem("isLoggedIn") === "true" && Date.now() - lastActivityTime >= 1800000) { alert("30 minute tak koi activity na hone ke karan aap auto-logout ho gaye hain. Kripya dobara login karein."); executeSystemLogout(); } }
 
-      // 🚀 FIX: PIN LOGIC BACKSPACE JUMP FIX & DISPLAY ISSUE
       function showPinScreen() { 
-          // Yahan se dashboardDiv ko hide karna hata diya gaya hai, taaki current page wahi rahe
           document.getElementById("loginWrapper").style.display = "none"; 
           let ps = document.getElementById("pinScreen");
           ps.style.display = "flex"; 
@@ -611,11 +620,9 @@
          setTimeout(() => {
              document.getElementById("pinActionBtn").innerText = "Unlock Portal";
              if(ent === localStorage.getItem("appPin")) { 
-                 // PIN Screen hatao aur piche wali screen show hone do
                  document.getElementById("pinScreen").style.display = "none"; 
                  document.getElementById("pinScreen").style.zIndex = "-1"; 
                  
-                 // Agar app just start hui hai, tabhi loadWorkspace chale, warna wahi rahe jahan tha
                  if (document.getElementById("dashboardDiv").style.display !== "flex") {
                      loadWorkspace(); 
                  }
@@ -691,26 +698,21 @@
       
       function toggleMobileMenu() { document.querySelector('.sidebar').classList.toggle('active'); document.getElementById('menu-overlay').classList.toggle('active'); }
       
-      // 🚀 FIX: FORM, FILTERS & STAFF MANAGEMENT AUTO-RESET
       function showSection(sid, nid) {
         document.querySelectorAll("form").forEach(f => f.reset());
         
-        // Fee Collection extra
         if(document.getElementById("searchQuery")) document.getElementById("searchQuery").value = "";
         if(document.getElementById("searchMessage")) document.getElementById("searchMessage").innerHTML = "";
         if(document.getElementById('feeFormBlock')) document.getElementById('feeFormBlock').style.display = 'none';
         
-        // Notice Board Message
         if(document.getElementById("customNoticeMsg")) document.getElementById("customNoticeMsg").value = "";
         
-        // Saare Sections ke Filters ko dusre page par jane par reset karna
         if(document.getElementById("finFrom")) { document.getElementById("finFrom").value = ""; document.getElementById("finTo").value = ""; }
         if(document.getElementById("flFrom")) { document.getElementById("flFrom").value = ""; document.getElementById("flTo").value = ""; document.getElementById("flMode").value = "All"; document.getElementById("flSearch").value = ""; }
         if(document.getElementById("searchStDir")) { document.getElementById("searchStDir").value = ""; document.getElementById("filterStStatus").value = "All"; }
         if(document.getElementById("filterExpFrom")) { document.getElementById("filterExpFrom").value = ""; document.getElementById("filterExpTo").value = ""; }
         if(document.getElementById("noticeShiftFilter")) { document.getElementById("noticeShiftFilter").value = "All"; document.getElementById("noticeStatusFilter").value = "All"; }
         
-        // 🎯 NAYA FIX: Staff Management Reset
         if(document.getElementById("staffName")) {
             document.getElementById("staffName").value = "";
             document.getElementById("staffMobile").value = "";
@@ -730,7 +732,6 @@
             if(o) o.classList.remove('active');
         }
         
-        // Data Load logic
         if(sid=='sec-dashboard') loadDashboardData(); 
         else if(sid=='sec-students'||sid=='sec-fees') calculateFee(); 
         else if(sid=='sec-studentList') loadStudentDetails(); 
@@ -810,13 +811,12 @@
               });
           }); 
       }
-            function deleteExpense(index) { if(confirm("Sure?")) callBackend("deleteExpense", {index:index}, r=>loadExpenses()); }
+      
       function loadStudentDetails() { callBackend("getStudentDetails", {}, list => { globalStudents = list.reverse(); filterStudentDirectory(); }); }
       function renderStudentDirectory(list) { let tb = document.getElementById("stDirBody"); tb.innerHTML=""; list.forEach(s=>{ let pUrl=(s.photo&&s.photo!=="No Photo"&&s.photo!=="Error")?(s.photo.match(/[-\w]{25,}/)?"https://drive.google.com/thumbnail?id="+s.photo.match(/[-\w]{25,}/)[0]+"&sz=w100":"https://via.placeholder.com/40"):"https://via.placeholder.com/40"; let stBadge=s.status==="Active"?"<b style='color:green'>Active</b>":"<b style='color:red'>Inactive</b>"; let actBtn=s.status==="Active"?`<button onclick="toggleStatus(${s.rowIndex},'Inactive')" class='btn-orange' style='padding:5px; font-size:12px; margin:2px;'>Make Inactive</button>`:`<button onclick="toggleStatus(${s.rowIndex},'Active')" class='btn-green' style='padding:5px; font-size:12px; margin:2px;'>Make Active</button>`; let rejBtn=s.status!=="Active"?`<button onclick="openRejoinModal(${s.rowIndex})" style='padding:5px; font-size:12px; margin:2px; background:#8e44ad; color:white;'>Rejoin</button>`:""; let updBtn=`<button onclick="openUpdateModal(${s.rowIndex})" class='btn-blue' style='padding:5px; font-size:12px; margin:2px;'>Update</button>`; let actions=updBtn+actBtn+rejBtn+(currentUserRole==="Admin"?`<button onclick="deleteStudentBtn(${s.rowIndex},'${s.id}')" class='btn-red' style='padding:5px; font-size:12px; margin:2px;'>Del</button>`:""); tb.innerHTML+=`<tr><td><img src='${pUrl}' style='width:40px;height:40px;border-radius:50%;object-fit:cover;'></td><td><b>${s.id}</b></td><td>${s.name}</td><td>${s.mobile}</td><td>${s.shift}</td><td>${stBadge}</td><td>${actions}</td></tr>`; }); }
       function filterStudentDirectory() { let q=document.getElementById("searchStDir").value.toLowerCase(), fs=document.getElementById("filterStStatus").value; renderStudentDirectory(globalStudents.filter(s=>(s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)||s.mobile.includes(q))&&(fs==="All"||s.status===fs))); }
       function toggleStatus(row, nStatus) { callBackend("toggleStudentStatus", {rowIndex:row, status:nStatus}, r=>{loadStudentDetails(); loadDashboardData();}); }
-     function deleteStudentBtn(row, id) { if(confirm("Delete "+id+"?")) callBackend("deleteStudent", {rowIndex:row, id:id}, r=>{loadStudentDetails(); loadDashboardData();}); }
-      // 🚀 FIX: Puraana Data Saaf hone ke BAAD Data Bharo
+      
       function openUpdateModal(rIdx) { 
           showSection('sec-update-student', 'nav-studentList'); 
           let st=globalStudents.find(s=>s.rowIndex==rIdx); 
@@ -830,12 +830,10 @@
       
       function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
       
-      // 🚀 FIX: UPDATE STUDENT DATA PASSING
       function saveStudentUpdate() { 
           let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
           
-          // Form clear hone se PEHLE data ko save karlo
           let savedId = document.getElementById("upd_id").value;
           let savedData = { studentName: document.getElementById("upd_name").value, fatherName: document.getElementById("upd_fname").value, mobile: d.mobile, joinDate: document.getElementById("upd_join").value };
           
@@ -844,14 +842,12 @@
               btn.innerHTML="Save Updates"; 
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
               
-              showSection('sec-studentList', 'nav-studentList'); // Ye form saaf karega
-              // Ab saaf form ki jagah saved data bhejo
+              showSection('sec-studentList', 'nav-studentList'); 
               showIdCard(savedId, savedData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
               loadStudentDetails();
           }); 
       }
       
-      // 🚀 FIX: Puraana Data Saaf hone ke BAAD Data Bharo
       function openRejoinModal(rIdx) { 
           showSection('sec-rejoin-student', 'nav-studentList'); 
           let st=globalStudents.find(s=>s.rowIndex==rIdx); 
@@ -868,13 +864,11 @@
 
       function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
       
-      // 🚀 FIX: REJOIN STUDENT DATA PASSING
       function saveRejoinStudent() { 
           let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); 
           let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; 
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
           
-          // Form clear hone se PEHLE data ko save karlo
           let savedId = document.getElementById("rej_id").value;
           let savedData = { studentName: document.getElementById("rej_name").value, fatherName: document.getElementById("rej_fname").value, mobile: d.mobile, joinDate: fDate };
 
@@ -883,8 +877,7 @@
               btn.innerHTML="Rejoin";  
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
               
-              showSection('sec-studentList', 'nav-studentList'); // Ye form saaf karega
-              // Ab saaf form ki jagah saved data bhejo
+              showSection('sec-studentList', 'nav-studentList'); 
               showIdCard(savedId, savedData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Rejoin"); 
               loadStudentDetails(); loadDashboardData();
           }); 
@@ -903,7 +896,7 @@
 
       function changeMapShift(shiftName, btnElement) { document.querySelectorAll('.shift-tab').forEach(el=>el.classList.remove('active')); btnElement.classList.add('active'); document.getElementById("currentMapShift").value=shiftName; loadSeatMap(shiftName); }
       function refreshCurrentMap() { loadSeatMap(document.getElementById("currentMapShift").value); }
-// 🚀 FRONTEND FIX: Backend is sending perfect data, so just display it directly!
+
       function loadSeatMap(shiftName) { 
           if(!shiftName) shiftName = "Morning"; 
           document.getElementById("seatMapContainer").innerHTML = "<h2>Loading Map...</h2>"; 
@@ -912,12 +905,12 @@
               if(res.success){
                   let html = ""; 
                   res.data.forEach(s => {
-                      let cls = "bg-avail"; // Default Available (Green)
+                      let cls = "bg-avail";
                       
                       if(s.status === "Blocked") {
                           cls = "bg-blk";
                       } else if(s.status === "Occupied") {
-                          cls = "bg-occ"; // Backend ne Occupied bola hai, toh direct Red kardo
+                          cls = "bg-occ"; 
                       }
                       
                       let stIdHtml = (cls === "bg-occ" && s.studentId) ? `<div class='seat-id-badge'>${s.studentId}</div>` : ""; 
@@ -928,13 +921,13 @@
                   document.getElementById("seatMapContainer").innerHTML = html === "" ? "<h3 style='color:#e74c3c;'>No Seats.</h3>" : html;
               } 
           }); 
-      }    
+      }   
       function openSeatModal(seatNo, status, studentId) { document.getElementById("seatActionModal").style.display="flex"; document.getElementById("smSeatNo").value=seatNo; document.getElementById("smTitle").innerText="Action for "+seatNo; document.getElementById("smMessage").innerHTML=""; let ad=document.getElementById("smAction"); ad.innerHTML=""; if(status==="Available"){document.getElementById("smStatusText").innerText="Available"; ad.innerHTML+="<option value='Assign'>Assign to Student</option><option value='Block'>Block Seat</option>";} else if(status==="Occupied"){document.getElementById("smStatusText").innerText="Occupied by: "+studentId; ad.innerHTML+="<option value='Vacate'>Vacate Seat</option>";} else if(status==="Blocked"){document.getElementById("smStatusText").innerText="Blocked"; ad.innerHTML+="<option value='Unblock'>Unblock Seat</option>";} toggleSeatInput(); }
       function toggleSeatInput() { document.getElementById("smStudentIdDiv").style.display = document.getElementById("smAction").value==="Assign"?"block":"none"; if(document.getElementById("smAction").value==="Assign") document.getElementById("smStudentId").value=""; }
       function closeSeatModal() { document.getElementById("seatActionModal").style.display="none"; }
       function saveSeatAction() { let sNo=document.getElementById("smSeatNo").value, act=document.getElementById("smAction").value, sId=document.getElementById("smStudentId").value.trim(), sShift=document.getElementById("currentMapShift").value; if(act==="Assign"&&sId==="") return document.getElementById("smMessage").innerHTML="<span class='error'>Enter ID!</span>"; document.getElementById("smSaveBtn").innerHTML="Updating..."; callBackend("updateSeatAction", {seatNo:sNo, action:act, studentId:sId, selectedShift:sShift}, res=>{document.getElementById("smSaveBtn").innerHTML="Update Seat"; if(res.success){closeSeatModal();refreshCurrentMap();} else document.getElementById("smMessage").innerHTML=`<span class='error'>${res.message}</span>`;}); }
 
-function submitExpense() { 
+      function submitExpense() { 
           let d={
               date:document.getElementById("expDate").value, 
               category:document.getElementById("expCat").value, 
@@ -946,7 +939,7 @@ function submitExpense() {
           let msg = document.getElementById("expMessage");
           
           if(!d.date || !d.amount) return msg.innerHTML="<span class='error'>Fill Date & Amt!</span>"; 
-          if(d.category === "") return msg.innerHTML="<span class='error'>Please Select Category!</span>"; // 🚀 FIX: Validation Check
+          if(d.category === "") return msg.innerHTML="<span class='error'>Please Select Category!</span>"; 
           
           document.getElementById("expBtn").innerHTML="Saving..."; 
           callBackend("addExpense", d, res=>{
@@ -958,7 +951,26 @@ function submitExpense() {
               }
           }); 
       }
-// 🚀 FIX: GITHUB PAGES EXPENSE LOGIC (Using callBackend instead of google.script.run)
+      
+      // 🚀 CUSTOM CONFIRMATION LOGIC
+      let confirmActionCallback = null;
+
+      function showCustomConfirm(message, callback) {
+          document.getElementById("confirmMessage").innerText = message;
+          document.getElementById("customConfirmModal").style.display = "flex";
+          confirmActionCallback = callback;
+      }
+
+      function closeConfirmModal() {
+          document.getElementById("customConfirmModal").style.display = "none";
+          confirmActionCallback = null;
+      }
+
+      function executeConfirmAction() {
+          if (confirmActionCallback) confirmActionCallback();
+          closeConfirmModal();
+      }
+
       function loadExpenses() {
           let f = document.getElementById("filterExpFrom").value;
           let t = document.getElementById("filterExpTo").value;
@@ -973,24 +985,33 @@ function submitExpense() {
               }
               
               list.forEach(function(e, index) { 
-                 // Backend(Code.gs) exactly index dhoondh raha hai, toh hum yahan se index hi bhejenge
-                 let actionBtn = currentUserRole === 'Admin' ? `<button onclick='deleteExpense(${index}, this)' class='btn-red' style='padding:2px 8px; margin-left:5px;'>Del</button>` : "";
+                 let actionBtn = currentUserRole === 'Admin' ? `<button onclick='deleteExpense(${index})' class='btn-red' style='padding:2px 8px; margin-left:5px;'>Del</button>` : "";
                  tbody.innerHTML += `<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${actionBtn}</td></tr>`;
               });
           });
       }
 
-          // 🎯 GitHub se data Code.gs ko bhejne ke liye callBackend ka proper use
-          callBackend("deleteExpense", { index: idx }, function(res) { 
-              if(res.success) {
-                  loadExpenses(); // Delete hote hi list ko refresh karein
-              } else {
-                  alert("Delete Error: " + res.message);
-                  btnElement.innerText = oldText; 
-                  btnElement.disabled = false;
-              }
-          }); 
+      function deleteExpense(idx) { 
+          showCustomConfirm("Kya aap sach me is Expense ko delete karna chahte hain?", function() {
+              callBackend("deleteExpense", { index: idx }, function(res) { 
+                  if(res.success) {
+                      loadExpenses(); 
+                  } else {
+                      alert("Delete Error: " + res.message);
+                  }
+              }); 
+          });
       }
+
+      function deleteStudentBtn(row, id) { 
+          showCustomConfirm(`Kya aap sach me Student ID: ${id} ko delete karna chahte hain?`, function() {
+              callBackend("deleteStudent", { rowIndex: row, id: id }, function(r) {
+                  loadStudentDetails(); 
+                  loadDashboardData();
+              });
+          });
+      }
+
       function loadPendingFees() { let tb=document.getElementById("pendingBody"); tb.innerHTML="<tr><td colspan='7'>Loading...</td></tr>"; callBackend("getPendingFees", {}, list=>{ tb.innerHTML=""; if(!list||list.length===0) return tb.innerHTML="<tr><td colspan='7'>No pending fees.</td></tr>"; let tDay=new Date(); tDay.setHours(0,0,0,0); list.forEach(s=>{s.diffDays=0; if(s.dueDate){let dp=s.dueDate.split("/"); if(dp.length===3){let due=new Date(dp[2],dp[1]-1,dp[0]); due.setHours(0,0,0,0); s.diffDays=Math.floor((tDay.getTime()-due.getTime())/(1000*60*60*24));}} }); list.sort((a,b)=>b.diffDays-a.diffDays); list.forEach(s=>{ tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mobile}</td><td><b style='color:red;'>${s.dueDate}</b></td><td><b style='color:#e67e22;'>${s.diffDays} Days</b></td><td>₹${s.amount}</td><td><a href='https://wa.me/91${s.mobile}?text=${encodeURIComponent(`*${currentConfig?currentConfig.name:"Library"}*\n\nDear ${s.name},\nYour fee is pending since ${s.dueDate} (${s.diffDays} days ago). Please submit your fee.\n\nThank you!`)}' target='_blank' class='btn-green' style='padding:5px 10px; text-decoration:none;'>WhatsApp</a></td></tr>`; }); }); }
       function loadNoticeBoard() { let fs=document.getElementById("noticeShiftFilter").value, ft=document.getElementById("noticeStatusFilter").value, tb=document.getElementById("noticeBody"); tb.innerHTML="<tr><td colspan='5'>Loading...</td></tr>"; callBackend("getStudentDetails", {}, list=>{tb.innerHTML=""; let c=0; list.forEach(s=>{if((ft==="All"||s.status===ft)&&(fs==="All"||s.shift===fs)){tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.shift}</td><td style='color:${s.status==="Active"?"green":"red"};font-weight:bold;'>${s.status}</td><td><button class='btn-green' style='padding:5px 10px;' onclick="sendNotice('${s.mobile}','${s.name}')">Message</button></td></tr>`; c++;}}); if(c===0) tb.innerHTML="<tr><td colspan='5' style='color:red;'>No students.</td></tr>";}); }
       function sendNotice(mob, name) { let cm=document.getElementById("customNoticeMsg").value.trim(), l=currentConfig?currentConfig.name:"Library", t=cm!==""?cm:"Please check the notice board for updates.", msg=`*${l} - Notice*\n\nDear ${name},\n${t}\n\nThank you!`; window.open("https://wa.me/91"+mob+"?text="+encodeURIComponent(msg), "_blank"); }
@@ -1005,7 +1026,6 @@ function submitExpense() {
       function saveLibShifts() { let s=[], rows=document.getElementById("configShiftBody").getElementsByTagName("tr"); for(let i=0;i<rows.length;i++){let n=rows[i].querySelector(".cs-n").value; if(n) s.push({name:n, m:rows[i].querySelector(".cs-m").value, q:rows[i].querySelector(".cs-q").value, h:rows[i].querySelector(".cs-h").value, y:rows[i].querySelector(".cs-y").value, d:rows[i].querySelector(".cs-d").value});} document.getElementById("btnShift").innerHTML="Saving..."; callBackend("updateLibShifts", s, r=>{document.getElementById("btnShift").innerHTML="Save Shifts"; initSystem();}); }
       function saveQrCode() { let fi=document.getElementById("qrUploadInput"); if(fi.files.length===0) return alert("Select QR!"); let btn=document.getElementById("qrUploadBtn"); btn.innerText="Uploading..."; btn.disabled=true; let rd=new FileReader(); rd.onload=e=>{callBackend("uploadQrCode", {base64Data:e.target.result, fileName:fi.files[0].name}, res=>{btn.innerText="Upload"; btn.disabled=false; if(res.success){alert("QR Uploaded!"); globalQrUrl=res.qrUrl;} else alert("Error");});}; rd.readAsDataURL(fi.files[0]); }
 
-      // 🚀 FIX: BASE64 IMAGE LOGIC FOR ID CARD
       function showIdCard(id, data, libData, pData, actionType) { 
           currentIdCardAction = actionType || "Add"; 
           document.getElementById("idc_libName").innerText = libData.name || "LIBRARY"; 
@@ -1025,7 +1045,6 @@ function submitExpense() {
           document.getElementById("idCardModal").style.display = "flex"; 
       }
       
-     // 🚀 FIX: WHATSAPP MESSAGE TEMPLATE
       function sendWhatsappWelcome() { 
           let n = document.getElementById("idc_name").innerText;
           let i = document.getElementById("idc_id").innerText;
