@@ -440,24 +440,45 @@
     <div id="receiptModal" class="modal-overlay"><div class="receipt-box" id="receiptContent"><input type="hidden" id="r_mobile"><h2 style="margin-top:0; border-bottom:1px dashed #333; padding-bottom:10px; text-align:center;">FEE RECEIPT</h2><div class="receipt-row"><span>Receipt No:</span><strong id="r_no"></strong></div><div class="receipt-row"><span>Date:</span><strong id="r_date"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>ID:</span><strong id="r_id"></strong></div><div class="receipt-row"><span>Name:</span><strong id="r_name"></strong></div><div class="receipt-row"><span>Period:</span><strong id="r_month"></strong></div><div class="receipt-row"><span>Mode:</span><strong id="r_mode"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Base:</span><strong id="r_base"></strong></div><div class="receipt-row"><span>Reg. Fee:</span><strong id="r_regFee"></strong></div><div class="receipt-row"><span>Disc:</span><strong id="r_disc"></strong></div><div style="border-bottom:2px solid #333; margin:10px 0;"></div><div class="receipt-row" style="font-size:18px; font-weight:bold;"><span>Total Paid:</span><strong id="r_total"></strong></div><div style="border-bottom:1px dashed #ccc; margin:10px 0;"></div><div class="receipt-row"><span>Next Due:</span><strong id="r_nextDue"></strong></div><button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'receiptContent', 'Fee_Receipt.jpg')" style="margin-top:15px;">Download / Print Receipt</button><button class="print-btn btn-green" onclick="sendWhatsappReceipt()" style="margin-top:10px;">WhatsApp Receipt</button><button class="print-btn btn-red" onclick="document.getElementById('receiptModal').style.display='none'" style="margin-top:10px;">Close</button></div></div>
     
 <div id="idCardModal" class="modal-overlay">
-      <div class="id-card-box" id="idCardContent">
-        <div class="id-card-header">
-          <h2 id="idc_libName" style="color: #2c3e50; font-size: 20px; font-weight: bold;">SANKALP A SMART LIBRARY</h2>
-          <p id="idc_libAddress">Address</p>
-          <p id="idc_libContact">Contact</p>
+      <div class="id-card-box" id="idCardContent" style="padding:0; overflow:hidden; border-radius:15px; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.3); width:350px;">
+        
+        <div class="id-card-header" style="background:#0f131c; color:white; padding:20px 15px; border-bottom:4px solid #e74c3c; margin:0;">
+          <h2 id="idc_libName" style="margin:0; font-size:22px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; color:white;">LIBRARY NAME</h2>
+          <p id="idc_libAddress" style="margin:5px 0 0 0; font-size:12px; color:#bdc3c7;">Address</p>
+          <p id="idc_libContact" style="margin:2px 0 0 0; font-size:12px; color:#bdc3c7;">Contact</p>
         </div>
-        <img id="idc_photo" class="id-card-photo" src="">
-        <div class="id-card-details">
-          <div><strong>Student Name:</strong> <span id="idc_name"></span></div>
-          <div><strong>Student ID:</strong> <span id="idc_id" style="color:#e74c3c; font-weight:bold;"></span></div>
-          <div><strong>Guardian Name:</strong> <span id="idc_fname"></span></div>
-          <div><strong>Mobile No:</strong> <span id="idc_mobile"></span></div>
-          <div><strong>Joining Date:</strong> <span id="idc_join"></span></div>
+        
+        <div style="padding: 25px 20px; background: #fff;">
+            <img id="idc_photo" src="" style="width:120px; height:140px; border:3px solid #e9ecef; border-radius:10px; object-fit:cover; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+            
+            <div style="text-align:left; font-size:14px; color:#2c3e50; border-top:2px dashed #eee; padding-top:15px;">
+              <div style="display:flex; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid #f0f2f5;">
+                <strong style="width:45%;">Student Name:</strong> <span id="idc_name" style="width:55%; text-align:right; font-weight:bold;"></span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0f2f5;">
+                <strong style="width:45%;">Student ID:</strong> <span id="idc_id" style="width:55%; text-align:right; font-weight:bold; color:#e74c3c; font-size:16px;"></span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0f2f5;">
+                <strong style="width:45%;">Guardian Name:</strong> <span id="idc_fname" style="width:55%; text-align:right; font-weight:600;"></span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0f2f5;">
+                <strong style="width:45%;">Mobile No:</strong> <span id="idc_mobile" style="width:55%; text-align:right; font-weight:600;"></span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-top:10px;">
+                <strong style="width:45%;">Joining Date:</strong> <span id="idc_join" style="width:55%; text-align:right; font-weight:600;"></span>
+              </div>
+            </div>
         </div>
-        <button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'idCardContent', 'Student_ID_Card.jpg')" style="margin-top:20px;">Download / Print ID</button>
-        <button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="margin-top:10px;">WhatsApp</button>
-        <button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="margin-top:10px;">Close</button>
+        
+        <div style="background:#f8f9fa; padding:15px 20px; display:flex; flex-direction:column; gap:10px;">
+            <button class="print-btn btn-blue" onclick="downloadImageAsJPEG(this, 'idCardContent', 'Student_ID_Card.jpg')" style="border-radius:30px;">Download / Print ID</button>
+            <div style="display:flex; gap:10px;">
+                <button class="print-btn btn-green" onclick="sendWhatsappWelcome()" style="border-radius:30px; flex:1;">WhatsApp</button>
+                <button class="print-btn btn-red" onclick="document.getElementById('idCardModal').style.display='none'" style="border-radius:30px; flex:1;">Close</button>
+            </div>
+        </div>
       </div>
+    </div>
     </div>
     <script>
       // ==========================================
@@ -748,17 +769,23 @@
       
       function calculateUpdFee() { let r=getShiftRates(document.getElementById("upd_shift").value), pl=document.getElementById("upd_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("upd_discount").value)||0); document.getElementById("upd_base").value=t<0?0:t; }
       
-      // 🚀 FIX: FULL DATA PASSED TO ID CARD ON UPDATE
+      // 🚀 FIX: UPDATE STUDENT DATA PASSING
       function saveStudentUpdate() { 
           let d={rowIndex:document.getElementById("upd_rowIndex").value, mobile:document.getElementById("upd_mobile").value.trim(), altMobile:document.getElementById("upd_altMobile").value.trim(), address:document.getElementById("upd_address").value, course:document.getElementById("upd_course").value, seatNo:document.getElementById("upd_seat").value, shift:document.getElementById("upd_shift").value, feePlan:document.getElementById("upd_feePlan").value, discount:document.getElementById("upd_discount").value, baseFee:document.getElementById("upd_base").value}; 
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          
+          // Form clear hone se PEHLE data ko save karlo
+          let savedId = document.getElementById("upd_id").value;
+          let savedData = { studentName: document.getElementById("upd_name").value, fatherName: document.getElementById("upd_fname").value, mobile: d.mobile, joinDate: document.getElementById("upd_join").value };
+          
           let btn = document.getElementById("updSaveBtn"); btn.innerHTML="Saving..."; 
           callBackend("updateStudentData", d, r=>{
               btn.innerHTML="Save Updates"; 
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              let fullData = {studentName:document.getElementById("upd_name").value, fatherName:document.getElementById("upd_fname").value, mobile:d.mobile, joinDate:document.getElementById("upd_join").value};
-              showSection('sec-studentList', 'nav-studentList'); 
-              showIdCard(document.getElementById("upd_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
+              
+              showSection('sec-studentList', 'nav-studentList'); // Ye form saaf karega
+              // Ab saaf form ki jagah saved data bhejo
+              showIdCard(savedId, savedData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Update"); 
               loadStudentDetails();
           }); 
       }
@@ -780,18 +807,24 @@
 
       function calculateRejFee() { let r=getShiftRates(document.getElementById("rej_shift").value), pl=document.getElementById("rej_feePlan").value, b=0; if(pl==="Monthly") b=r.m; else if(pl==="Quarterly") b=r.q; else if(pl==="Half Yearly") b=r.h; else if(pl==="Yearly") b=r.y; else if(pl==="Demo") b=r.d; let t=parseInt(b)-(parseInt(document.getElementById("rej_discount").value)||0); document.getElementById("rej_base").value=t<0?0:t; }
       
-      // 🚀 FIX: FULL DATA PASSED TO ID CARD ON REJOIN
+      // 🚀 FIX: REJOIN STUDENT DATA PASSING
       function saveRejoinStudent() { 
           let dObj=new Date(document.getElementById("rej_due").value), fDate=("0"+dObj.getDate()).slice(-2)+"/"+("0"+(dObj.getMonth()+1)).slice(-2)+"/"+dObj.getFullYear(); 
           let d={rowIndex:document.getElementById("rej_rowIndex").value, mobile:document.getElementById("rej_mobile").value.trim(), altMobile:document.getElementById("rej_altMobile").value.trim(), address:document.getElementById("rej_address").value, course:document.getElementById("rej_course").value, seatNo:document.getElementById("rej_seat").value, shift:document.getElementById("rej_shift").value, feePlan:document.getElementById("rej_feePlan").value, discount:document.getElementById("rej_discount").value, baseFee:document.getElementById("rej_base").value, dueDate:fDate}; 
           if(!/^\d{10}$/.test(d.mobile)) return alert("Mobile 10 digits!"); 
+          
+          // Form clear hone se PEHLE data ko save karlo
+          let savedId = document.getElementById("rej_id").value;
+          let savedData = { studentName: document.getElementById("rej_name").value, fatherName: document.getElementById("rej_fname").value, mobile: d.mobile, joinDate: fDate };
+
           let btn = document.getElementById("rejSaveBtn"); btn.innerHTML="Saving..."; 
           callBackend("rejoinStudent", d, r=>{
               btn.innerHTML="Rejoin";  
               let st=globalStudents.find(s=>s.rowIndex==d.rowIndex); 
-              let fullData = {studentName:document.getElementById("rej_name").value, fatherName:document.getElementById("rej_fname").value, mobile:d.mobile, joinDate:fDate};
-              showSection('sec-studentList', 'nav-studentList');
-              showIdCard(document.getElementById("rej_id").value, fullData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Rejoin"); 
+              
+              showSection('sec-studentList', 'nav-studentList'); // Ye form saaf karega
+              // Ab saaf form ki jagah saved data bhejo
+              showIdCard(savedId, savedData, currentConfig || {name:"LIBRARY", address:"", mobile:"", email:""}, st?st.photo:"", "Rejoin"); 
               loadStudentDetails(); loadDashboardData();
           }); 
       }
@@ -852,24 +885,24 @@
           document.getElementById("idCardModal").style.display = "flex"; 
       }
       
-      // 🚀 FIX: PERFECT WHATSAPP MESSAGING
+     // 🚀 FIX: WHATSAPP MESSAGE TEMPLATE
       function sendWhatsappWelcome() { 
           let n = document.getElementById("idc_name").innerText;
           let i = document.getElementById("idc_id").innerText;
           let m = document.getElementById("idc_mobile").innerText;
-          // Mobile number ko 91 format me laana
-          if(m && m.length === 10) m = "91" + m; 
+          let libName = document.getElementById("idc_libName").innerText;
           
+          if(m && m.length === 10) m = "91" + m; 
           let msg = ""; 
           
           if(currentIdCardAction === "Update") {
-              msg = `Dear ${n},\nYour profile details have been successfully updated. Your student ID is *${i}*.\n\nThank you!`; 
+              msg = `Welcome to *${libName}*\n\nDear ${n},\nYour profile details have been successfully updated. Your student ID is *${i}*.\n\nThank you!`; 
           } 
           else if(currentIdCardAction === "Rejoin") {
-              msg = `Welcome back! Your rejoin is successful.\n\nDear ${n},\nYour student ID is *${i}*.\n\nThank you!`; 
+              msg = `Welcome back to *${libName}*\n\nDear ${n},\nYour rejoin is successful. Your student ID is *${i}*.\n\nThank you!`; 
           } 
           else {
-              msg = `Welcome to *SANKALP A SMART LIBRARY*\n\nDear ${n},\nYour registration is successful. Your student ID is *${i}*.\n\nThank you!`; 
+              msg = `Welcome to *${libName}*\n\nDear ${n},\nYour registration is successful. Your student ID is *${i}*.\n\nThank you!`; 
           }
           
           window.open("https://wa.me/" + m + "?text=" + encodeURIComponent(msg), "_blank"); 
