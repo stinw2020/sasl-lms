@@ -682,24 +682,34 @@
       
       function toggleMobileMenu() { document.querySelector('.sidebar').classList.toggle('active'); document.getElementById('menu-overlay').classList.toggle('active'); }
       
-      // 🚀 FIX: FORM AUTO-RESET JAB TAB CHANGE HO (Search Box ke sath)
+      // 🚀 FIX: FORM & ALL FILTERS AUTO-RESET JAB TAB CHANGE HO
       function showSection(sid, nid) {
         document.querySelectorAll("form").forEach(f => f.reset());
         
-        // Fee Collection ke extra fields manually clear karein
+        // Fee Collection extra
         if(document.getElementById("searchQuery")) document.getElementById("searchQuery").value = "";
         if(document.getElementById("searchMessage")) document.getElementById("searchMessage").innerHTML = "";
         if(document.getElementById('feeFormBlock')) document.getElementById('feeFormBlock').style.display = 'none';
+        
+        // Notice Board Message
+        if(document.getElementById("customNoticeMsg")) document.getElementById("customNoticeMsg").value = "";
+        
+        // 🚀 NAYA: Saare Sections ke Filters ko dusre page par jane par reset karna
+        if(document.getElementById("finFrom")) { document.getElementById("finFrom").value = ""; document.getElementById("finTo").value = ""; }
+        if(document.getElementById("flFrom")) { document.getElementById("flFrom").value = ""; document.getElementById("flTo").value = ""; document.getElementById("flMode").value = "All"; document.getElementById("flSearch").value = ""; }
+        if(document.getElementById("searchStDir")) { document.getElementById("searchStDir").value = ""; document.getElementById("filterStStatus").value = "All"; }
+        if(document.getElementById("filterExpFrom")) { document.getElementById("filterExpFrom").value = ""; document.getElementById("filterExpTo").value = ""; }
+        if(document.getElementById("noticeShiftFilter")) { document.getElementById("noticeShiftFilter").value = "All"; document.getElementById("noticeStatusFilter").value = "All"; }
         
         document.querySelectorAll('.section-view').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.nav-menu li').forEach(el=>el.classList.remove('active'));
         document.getElementById(sid).classList.add('active'); if(document.getElementById(nid)) document.getElementById(nid).classList.add('active');
         if(window.innerWidth<=768){document.querySelector('.sidebar').classList.remove('active'); let o=document.getElementById('menu-overlay'); if(o) o.classList.remove('active');}
         
+        // Data Load logic
         if(sid=='sec-dashboard') loadDashboardData(); else if(sid=='sec-students'||sid=='sec-fees') calculateFee(); else if(sid=='sec-studentList') loadStudentDetails(); else if(sid=='sec-seats') loadSeatMap(document.getElementById("currentMapShift").value); else if(sid=='sec-exp') loadExpenses(); else if(sid=='sec-reports') loadPendingFees(); else if(sid=='sec-notice') loadNoticeBoard(); else if(sid=='sec-feeList') loadAllFees(); else if(sid=='sec-config') loadConfigPanel(); else if(sid=='sec-financial') loadFinancialData();
         else if(sid=='sec-profile') { document.getElementById("profCurrId").value = currentUserId; document.getElementById("profNewId").value = currentUserId; }
         else if(sid=='sec-staff') loadStaffList();
       }
-
       function updateProfileSettings() {
          let nId = document.getElementById("profNewId").value.trim(), nPass = document.getElementById("profNewPass").value.trim();
          if(!nId || !nPass) { document.getElementById("profMessage").innerHTML="<span class='error'>ID and Password required!</span>"; return; }
