@@ -691,7 +691,7 @@
       
       function toggleMobileMenu() { document.querySelector('.sidebar').classList.toggle('active'); document.getElementById('menu-overlay').classList.toggle('active'); }
       
-      // 🚀 FIX: FORM & ALL FILTERS AUTO-RESET JAB TAB CHANGE HO
+      // 🚀 FIX: FORM, FILTERS & STAFF MANAGEMENT AUTO-RESET
       function showSection(sid, nid) {
         document.querySelectorAll("form").forEach(f => f.reset());
         
@@ -703,19 +703,44 @@
         // Notice Board Message
         if(document.getElementById("customNoticeMsg")) document.getElementById("customNoticeMsg").value = "";
         
-        // 🚀 NAYA: Saare Sections ke Filters ko dusre page par jane par reset karna
+        // Saare Sections ke Filters ko dusre page par jane par reset karna
         if(document.getElementById("finFrom")) { document.getElementById("finFrom").value = ""; document.getElementById("finTo").value = ""; }
         if(document.getElementById("flFrom")) { document.getElementById("flFrom").value = ""; document.getElementById("flTo").value = ""; document.getElementById("flMode").value = "All"; document.getElementById("flSearch").value = ""; }
         if(document.getElementById("searchStDir")) { document.getElementById("searchStDir").value = ""; document.getElementById("filterStStatus").value = "All"; }
         if(document.getElementById("filterExpFrom")) { document.getElementById("filterExpFrom").value = ""; document.getElementById("filterExpTo").value = ""; }
         if(document.getElementById("noticeShiftFilter")) { document.getElementById("noticeShiftFilter").value = "All"; document.getElementById("noticeStatusFilter").value = "All"; }
         
-        document.querySelectorAll('.section-view').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.nav-menu li').forEach(el=>el.classList.remove('active'));
-        document.getElementById(sid).classList.add('active'); if(document.getElementById(nid)) document.getElementById(nid).classList.add('active');
-        if(window.innerWidth<=768){document.querySelector('.sidebar').classList.remove('active'); let o=document.getElementById('menu-overlay'); if(o) o.classList.remove('active');}
+        // 🎯 NAYA FIX: Staff Management Reset
+        if(document.getElementById("staffName")) {
+            document.getElementById("staffName").value = "";
+            document.getElementById("staffMobile").value = "";
+            document.getElementById("staffEmail").value = "";
+        }
+        if(document.getElementById("staffMessage")) document.getElementById("staffMessage").innerHTML = "";
+        
+        document.querySelectorAll('.section-view').forEach(el=>el.classList.remove('active')); 
+        document.querySelectorAll('.nav-menu li').forEach(el=>el.classList.remove('active'));
+        
+        document.getElementById(sid).classList.add('active'); 
+        if(document.getElementById(nid)) document.getElementById(nid).classList.add('active');
+        
+        if(window.innerWidth<=768){
+            document.querySelector('.sidebar').classList.remove('active'); 
+            let o=document.getElementById('menu-overlay'); 
+            if(o) o.classList.remove('active');
+        }
         
         // Data Load logic
-        if(sid=='sec-dashboard') loadDashboardData(); else if(sid=='sec-students'||sid=='sec-fees') calculateFee(); else if(sid=='sec-studentList') loadStudentDetails(); else if(sid=='sec-seats') loadSeatMap(document.getElementById("currentMapShift").value); else if(sid=='sec-exp') loadExpenses(); else if(sid=='sec-reports') loadPendingFees(); else if(sid=='sec-notice') loadNoticeBoard(); else if(sid=='sec-feeList') loadAllFees(); else if(sid=='sec-config') loadConfigPanel(); else if(sid=='sec-financial') loadFinancialData();
+        if(sid=='sec-dashboard') loadDashboardData(); 
+        else if(sid=='sec-students'||sid=='sec-fees') calculateFee(); 
+        else if(sid=='sec-studentList') loadStudentDetails(); 
+        else if(sid=='sec-seats') loadSeatMap(document.getElementById("currentMapShift").value); 
+        else if(sid=='sec-exp') loadExpenses(); 
+        else if(sid=='sec-reports') loadPendingFees(); 
+        else if(sid=='sec-notice') loadNoticeBoard(); 
+        else if(sid=='sec-feeList') loadAllFees(); 
+        else if(sid=='sec-config') loadConfigPanel(); 
+        else if(sid=='sec-financial') loadFinancialData();
         else if(sid=='sec-profile') { document.getElementById("profCurrId").value = currentUserId; document.getElementById("profNewId").value = currentUserId; }
         else if(sid=='sec-staff') loadStaffList();
       }
@@ -879,34 +904,52 @@
 
       function changeMapShift(shiftName, btnElement) { document.querySelectorAll('.shift-tab').forEach(el=>el.classList.remove('active')); btnElement.classList.add('active'); document.getElementById("currentMapShift").value=shiftName; loadSeatMap(shiftName); }
       function refreshCurrentMap() { loadSeatMap(document.getElementById("currentMapShift").value); }
-function loadSeatMap(shiftName) { 
-          if(!shiftName) shiftName="Morning"; 
-          document.getElementById("seatMapContainer").innerHTML="<h2>Loading Map...</h2>"; 
+// 🚀 FIX: STRICT SHIFT-WISE SEAT ALLOTMENT LOGIC
+      function loadSeatMap(shiftName) { 
+          if(!shiftName) shiftName = "Morning"; 
+          document.getElementById("seatMapContainer").innerHTML = "<h2>Loading Map...</h2>"; 
           
-          callBackend("getSeatData", {shiftName:shiftName}, res=>{ 
+          callBackend("getSeatData", { shiftName: shiftName }, function(res) { 
               if(res.success){
-                  let html=""; 
-                  res.data.forEach(s=>{
-                      let cls = "bg-avail"; // Default Available
+                  let html = ""; 
+                  res.data.forEach(s => {
+                      let cls = "bg-avail"; // Default: Khaali (Green)
                       
                       if(s.status === "Blocked") {
-                          cls = "bg-blk";
+                          cls = "bg-blk"; // Blocked Seat (Gray)
                       } else if(s.status === "Occupied") {
-                          // 🚀 FIX: Seat tabhi Occupied (Red) dikhe jab student ki shift current map shift se match kare 
-                          // YA student ki shift 'Full Day' ho.
-                          if(s.studentShift === shiftName || s.studentShift === "Full Day" || shiftName === "Full Day") {
+                          
+                          // 🎯 CRITICAL FIX: Shift Matching Conditions
+                          let studentShift = (s.studentShift || "").toString().trim().toLowerCase();
+                          let currentMapShift = shiftName.toString().trim().toLowerCase();
+                          
+                          if (studentShift === "full day") {
+                              // 1. Agar student "Full Day" ka hai, toh wo MORNING, EVENING, NIGHT har map me Red (Occupied) dikhega.
                               cls = "bg-occ";
+                          } else if (currentMapShift === "full day") {
+                              // 2. Agar hum "Full Day" ka map dekh rahe hain, toh sirf "Full Day" wale students hi Red dikhne chahiye.
+                              if (studentShift === "full day") {
+                                  cls = "bg-occ";
+                              } else {
+                                  cls = "bg-avail"; // Morning/Evening wale student Full day map me khaali dikhenge
+                              }
                           } else {
-                              cls = "bg-avail"; // Agar dusri shift ka student hai toh is shift me seat khaali dikhegi
+                              // 3. Agar normal shift map dekh rahe hain (Morning/Evening/Night), toh student ki shift ditto match honi chahiye.
+                              if (studentShift === currentMapShift) {
+                                  cls = "bg-occ";
+                              } else {
+                                  cls = "bg-avail"; // Kisi aur shift ka student hai toh is shift me seat khaali dikhegi
+                              }
                           }
                       }
                       
+                      // Agar seat sach me is shift me occupied hai, tabhi student ID ka badge dikhao
                       let stIdHtml = (cls === "bg-occ" && s.studentId) ? `<div class='seat-id-badge'>${s.studentId}</div>` : ""; 
-                      let clickStatus = cls === "bg-occ" ? "Occupied" : s.status; // Modal accurate open karne ke liye
+                      let clickStatus = (cls === "bg-occ") ? "Occupied" : (s.status === "Blocked" ? "Blocked" : "Available");
                       
-                      html+=`<div class='seat-card ${cls}' onclick="openSeatModal('${s.seatNo}','${clickStatus}','${s.studentId || ''}')">${stIdHtml}<div style='font-size:18px;'>${s.seatNo}</div></div>`;
+                      html += `<div class='seat-card ${cls}' onclick="openSeatModal('${s.seatNo}','${clickStatus}','${s.studentId || ''}')">${stIdHtml}<div style='font-size:18px;'>${s.seatNo}</div></div>`;
                   }); 
-                  document.getElementById("seatMapContainer").innerHTML=html===""?"<h3 style='color:#e74c3c;'>No Seats.</h3>":html;
+                  document.getElementById("seatMapContainer").innerHTML = html === "" ? "<h3 style='color:#e74c3c;'>No Seats.</h3>" : html;
               } 
           }); 
       }     
@@ -948,7 +991,28 @@ function loadExpenses() {
                   tb.innerHTML+=`<tr><td>${e.date}</td><td>${e.cat}</td><td>₹${e.amt}</td><td>${e.desc}</td><td>${currentUserRole==='Admin'?`<button onclick='deleteExpense(${e.rowIndex})' class='btn-red' style='padding:2px 8px;'>Del</button>`:''}</td></tr>`;
               }); 
           }); 
-      }      function deleteExpense(index) { if(confirm("Sure?")) callBackend("deleteExpense", {index:index}, r=>loadExpenses()); }
+      }     
+// 🚀 FIX: Expense Delete System with Exact RowIndex
+      function deleteExpense(rowIdx) { 
+          if(confirm("Kya aap sach me is Expense ko delete karna chahte hain?")) {
+              // Button ko loading status par daalein
+              let btn = event.target;
+              let oldText = btn.innerText;
+              btn.innerText = "⏳...";
+              btn.disabled = true;
+
+              callBackend("deleteExpense", { rowIndex: rowIdx }, function(r) {
+                  if(r.success || r) {
+                      alert("Expense kamiyabi se delete ho gaya!");
+                      loadExpenses(); // List ko fresh reload karein
+                  } else {
+                      alert("Delete karne me koi dikkat aayi.");
+                      btn.innerText = oldText;
+                      btn.disabled = false;
+                  }
+              });
+          }
+      }
       function loadPendingFees() { let tb=document.getElementById("pendingBody"); tb.innerHTML="<tr><td colspan='7'>Loading...</td></tr>"; callBackend("getPendingFees", {}, list=>{ tb.innerHTML=""; if(!list||list.length===0) return tb.innerHTML="<tr><td colspan='7'>No pending fees.</td></tr>"; let tDay=new Date(); tDay.setHours(0,0,0,0); list.forEach(s=>{s.diffDays=0; if(s.dueDate){let dp=s.dueDate.split("/"); if(dp.length===3){let due=new Date(dp[2],dp[1]-1,dp[0]); due.setHours(0,0,0,0); s.diffDays=Math.floor((tDay.getTime()-due.getTime())/(1000*60*60*24));}} }); list.sort((a,b)=>b.diffDays-a.diffDays); list.forEach(s=>{ tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.mobile}</td><td><b style='color:red;'>${s.dueDate}</b></td><td><b style='color:#e67e22;'>${s.diffDays} Days</b></td><td>₹${s.amount}</td><td><a href='https://wa.me/91${s.mobile}?text=${encodeURIComponent(`*${currentConfig?currentConfig.name:"Library"}*\n\nDear ${s.name},\nYour fee is pending since ${s.dueDate} (${s.diffDays} days ago). Please submit your fee.\n\nThank you!`)}' target='_blank' class='btn-green' style='padding:5px 10px; text-decoration:none;'>WhatsApp</a></td></tr>`; }); }); }
       function loadNoticeBoard() { let fs=document.getElementById("noticeShiftFilter").value, ft=document.getElementById("noticeStatusFilter").value, tb=document.getElementById("noticeBody"); tb.innerHTML="<tr><td colspan='5'>Loading...</td></tr>"; callBackend("getStudentDetails", {}, list=>{tb.innerHTML=""; let c=0; list.forEach(s=>{if((ft==="All"||s.status===ft)&&(fs==="All"||s.shift===fs)){tb.innerHTML+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.shift}</td><td style='color:${s.status==="Active"?"green":"red"};font-weight:bold;'>${s.status}</td><td><button class='btn-green' style='padding:5px 10px;' onclick="sendNotice('${s.mobile}','${s.name}')">Message</button></td></tr>`; c++;}}); if(c===0) tb.innerHTML="<tr><td colspan='5' style='color:red;'>No students.</td></tr>";}); }
       function sendNotice(mob, name) { let cm=document.getElementById("customNoticeMsg").value.trim(), l=currentConfig?currentConfig.name:"Library", t=cm!==""?cm:"Please check the notice board for updates.", msg=`*${l} - Notice*\n\nDear ${name},\n${t}\n\nThank you!`; window.open("https://wa.me/91"+mob+"?text="+encodeURIComponent(msg), "_blank"); }
