@@ -826,48 +826,7 @@
       function renderStudentDirectory(list) { let tb = document.getElementById("stDirBody"); tb.innerHTML=""; list.forEach(s=>{ let pUrl=(s.photo&&s.photo!=="No Photo"&&s.photo!=="Error")?(s.photo.match(/[-\w]{25,}/)?"https://drive.google.com/thumbnail?id="+s.photo.match(/[-\w]{25,}/)[0]+"&sz=w100":"https://via.placeholder.com/40"):"https://via.placeholder.com/40"; let stBadge=s.status==="Active"?"<b style='color:green'>Active</b>":"<b style='color:red'>Inactive</b>"; let actBtn=s.status==="Active"?`<button onclick="toggleStatus(${s.rowIndex},'Inactive')" class='btn-orange' style='padding:5px; font-size:12px; margin:2px;'>Make Inactive</button>`:`<button onclick="toggleStatus(${s.rowIndex},'Active')" class='btn-green' style='padding:5px; font-size:12px; margin:2px;'>Make Active</button>`; let rejBtn=s.status!=="Active"?`<button onclick="openRejoinModal(${s.rowIndex})" style='padding:5px; font-size:12px; margin:2px; background:#8e44ad; color:white;'>Rejoin</button>`:""; let updBtn=`<button onclick="openUpdateModal(${s.rowIndex})" class='btn-blue' style='padding:5px; font-size:12px; margin:2px;'>Update</button>`; let actions=updBtn+actBtn+rejBtn+(currentUserRole==="Admin"?`<button onclick="deleteStudentBtn(${s.rowIndex},'${s.id}')" class='btn-red' style='padding:5px; font-size:12px; margin:2px;'>Del</button>`:""); tb.innerHTML+=`<tr><td><img src='${pUrl}' style='width:40px;height:40px;border-radius:50%;object-fit:cover;'></td><td><b>${s.id}</b></td><td>${s.name}</td><td>${s.mobile}</td><td>${s.shift}</td><td>${stBadge}</td><td>${actions}</td></tr>`; }); }
       function filterStudentDirectory() { let q=document.getElementById("searchStDir").value.toLowerCase(), fs=document.getElementById("filterStStatus").value; renderStudentDirectory(globalStudents.filter(s=>(s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)||s.mobile.includes(q))&&(fs==="All"||s.status===fs))); }
       function toggleStatus(row, nStatus) { callBackend("toggleStudentStatus", {rowIndex:row, status:nStatus}, r=>{loadStudentDetails(); loadDashboardData();}); }
-      // 🚀 CUSTOM CONFIRMATION LOGIC
-      let confirmActionCallback = null;
-
-      function showCustomConfirm(message, callback) {
-          document.getElementById("confirmMessage").innerText = message;
-          document.getElementById("customConfirmModal").style.display = "flex";
-          confirmActionCallback = callback;
-      }
-
-      function closeConfirmModal() {
-          document.getElementById("customConfirmModal").style.display = "none";
-          confirmActionCallback = null;
-      }
-
-      function executeConfirmAction() {
-          if (confirmActionCallback) confirmActionCallback();
-          closeConfirmModal();
-      }
-
-      // 🚀 UPDATED EXPENSE DELETE (No URL Alert)
-      function deleteExpense(idx) { 
-          // Ye call custom popup open karegi
-          showCustomConfirm("Kya aap sach me is Expense ko delete karna chahte hain?", function() {
-              callBackend("deleteExpense", { index: idx }, function(res) { 
-                  if(res.success) {
-                      loadExpenses(); 
-                  } else {
-                      alert("Delete Error: " + res.message);
-                  }
-              }); 
-          });
-      }
-
-      // 🚀 UPDATED STUDENT DELETE (No URL Alert)
-      function deleteStudentBtn(row, id) { 
-          showCustomConfirm(`Kya aap sach me Student ID: ${id} ko delete karna chahte hain?`, function() {
-              callBackend("deleteStudent", { rowIndex: row, id: id }, function(r) {
-                  loadStudentDetails(); 
-                  loadDashboardData();
-              });
-          });
-      }
+     
       // 🚀 FIX: Puraana Data Saaf hone ke BAAD Data Bharo
       function openUpdateModal(rIdx) { 
           showSection('sec-update-student', 'nav-studentList'); 
@@ -1114,7 +1073,48 @@ function submitExpense() {
       document.addEventListener("DOMContentLoaded", function() {
           setTimeout(checkAdminFeeVisibility, 1000);
       });
-      
+       // 🚀 CUSTOM CONFIRMATION LOGIC
+      let confirmActionCallback = null;
+
+      function showCustomConfirm(message, callback) {
+          document.getElementById("confirmMessage").innerText = message;
+          document.getElementById("customConfirmModal").style.display = "flex";
+          confirmActionCallback = callback;
+      }
+
+      function closeConfirmModal() {
+          document.getElementById("customConfirmModal").style.display = "none";
+          confirmActionCallback = null;
+      }
+
+      function executeConfirmAction() {
+          if (confirmActionCallback) confirmActionCallback();
+          closeConfirmModal();
+      }
+
+      // 🚀 UPDATED EXPENSE DELETE (No URL Alert)
+      function deleteExpense(idx) { 
+          // Ye call custom popup open karegi
+          showCustomConfirm("Kya aap sach me is Expense ko delete karna chahte hain?", function() {
+              callBackend("deleteExpense", { index: idx }, function(res) { 
+                  if(res.success) {
+                      loadExpenses(); 
+                  } else {
+                      alert("Delete Error: " + res.message);
+                  }
+              }); 
+          });
+      }
+
+      // 🚀 UPDATED STUDENT DELETE (No URL Alert)
+      function deleteStudentBtn(row, id) { 
+          showCustomConfirm(`Kya aap sach me Student ID: ${id} ko delete karna chahte hain?`, function() {
+              callBackend("deleteStudent", { rowIndex: row, id: id }, function(r) {
+                  loadStudentDetails(); 
+                  loadDashboardData();
+              });
+          });
+      }
     </script>
   </body>
 </html>
