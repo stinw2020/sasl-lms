@@ -904,7 +904,7 @@
 
       function changeMapShift(shiftName, btnElement) { document.querySelectorAll('.shift-tab').forEach(el=>el.classList.remove('active')); btnElement.classList.add('active'); document.getElementById("currentMapShift").value=shiftName; loadSeatMap(shiftName); }
       function refreshCurrentMap() { loadSeatMap(document.getElementById("currentMapShift").value); }
-// 🚀 FIX: STRICT SHIFT-WISE SEAT ALLOTMENT LOGIC
+// 🚀 FRONTEND FIX: Backend is sending perfect data, so just display it directly!
       function loadSeatMap(shiftName) { 
           if(!shiftName) shiftName = "Morning"; 
           document.getElementById("seatMapContainer").innerHTML = "<h2>Loading Map...</h2>"; 
@@ -913,37 +913,14 @@
               if(res.success){
                   let html = ""; 
                   res.data.forEach(s => {
-                      let cls = "bg-avail"; // Default: Khaali (Green)
+                      let cls = "bg-avail"; // Default Available (Green)
                       
                       if(s.status === "Blocked") {
-                          cls = "bg-blk"; // Blocked Seat (Gray)
+                          cls = "bg-blk";
                       } else if(s.status === "Occupied") {
-                          
-                          // 🎯 CRITICAL FIX: Shift Matching Conditions
-                          let studentShift = (s.studentShift || "").toString().trim().toLowerCase();
-                          let currentMapShift = shiftName.toString().trim().toLowerCase();
-                          
-                          if (studentShift === "full day") {
-                              // 1. Agar student "Full Day" ka hai, toh wo MORNING, EVENING, NIGHT har map me Red (Occupied) dikhega.
-                              cls = "bg-occ";
-                          } else if (currentMapShift === "full day") {
-                              // 2. Agar hum "Full Day" ka map dekh rahe hain, toh sirf "Full Day" wale students hi Red dikhne chahiye.
-                              if (studentShift === "full day") {
-                                  cls = "bg-occ";
-                              } else {
-                                  cls = "bg-avail"; // Morning/Evening wale student Full day map me khaali dikhenge
-                              }
-                          } else {
-                              // 3. Agar normal shift map dekh rahe hain (Morning/Evening/Night), toh student ki shift ditto match honi chahiye.
-                              if (studentShift === currentMapShift) {
-                                  cls = "bg-occ";
-                              } else {
-                                  cls = "bg-avail"; // Kisi aur shift ka student hai toh is shift me seat khaali dikhegi
-                              }
-                          }
+                          cls = "bg-occ"; // Backend ne Occupied bola hai, toh direct Red kardo
                       }
                       
-                      // Agar seat sach me is shift me occupied hai, tabhi student ID ka badge dikhao
                       let stIdHtml = (cls === "bg-occ" && s.studentId) ? `<div class='seat-id-badge'>${s.studentId}</div>` : ""; 
                       let clickStatus = (cls === "bg-occ") ? "Occupied" : (s.status === "Blocked" ? "Blocked" : "Available");
                       
@@ -952,7 +929,7 @@
                   document.getElementById("seatMapContainer").innerHTML = html === "" ? "<h3 style='color:#e74c3c;'>No Seats.</h3>" : html;
               } 
           }); 
-      }     
+      }    
       function openSeatModal(seatNo, status, studentId) { document.getElementById("seatActionModal").style.display="flex"; document.getElementById("smSeatNo").value=seatNo; document.getElementById("smTitle").innerText="Action for "+seatNo; document.getElementById("smMessage").innerHTML=""; let ad=document.getElementById("smAction"); ad.innerHTML=""; if(status==="Available"){document.getElementById("smStatusText").innerText="Available"; ad.innerHTML+="<option value='Assign'>Assign to Student</option><option value='Block'>Block Seat</option>";} else if(status==="Occupied"){document.getElementById("smStatusText").innerText="Occupied by: "+studentId; ad.innerHTML+="<option value='Vacate'>Vacate Seat</option>";} else if(status==="Blocked"){document.getElementById("smStatusText").innerText="Blocked"; ad.innerHTML+="<option value='Unblock'>Unblock Seat</option>";} toggleSeatInput(); }
       function toggleSeatInput() { document.getElementById("smStudentIdDiv").style.display = document.getElementById("smAction").value==="Assign"?"block":"none"; if(document.getElementById("smAction").value==="Assign") document.getElementById("smStudentId").value=""; }
       function closeSeatModal() { document.getElementById("seatActionModal").style.display="none"; }
